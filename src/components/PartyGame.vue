@@ -8,6 +8,7 @@
           <option disabled value="">Please select one</option>
           <option>YenTing</option>
           <option>FillingIn</option>
+          <option>ChoicesPath</option>
           <option>Raven</option>
         </select>
       </div>
@@ -42,12 +43,13 @@ import QRCode from 'qrcode'
 import socket from '@/socket.js'
 import wordList from '@/fei-words.js'
 import FillingIn from './FillingIn.vue'
+import ChoicesPath from './ChoicesPath.vue'
 import Raven from './Raven.vue'
 import YenTing from './YenTing.vue'
 
 
 export default {
-  components: { FillingIn, Raven, YenTing },
+  components: { FillingIn, Raven, YenTing, ChoicesPath },
   data() {
     return {
       socket: socket,

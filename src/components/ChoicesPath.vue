@@ -6,6 +6,12 @@
         <h1 id="title">
           Path
         </h1>
+        <p v-for="(line, index) in pathWords" :key="index">
+          {{ line[0].substring(0, line[0].indexOf("$")) }}
+          {{ line[1][pathFirstChoice[index]]}}
+          {{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) }}
+          {{ line[2][pathSecondChoice[index]] }}
+        </p>
         <p>
           <span>長頭髮的<WordSelector i="0" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='1' :wordList='wordList' :blankList='blankList' :socket='socket' />住在<WordSelector i="1" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' />裡</span>
           <span>討厭<WordSelector i="2" anchor="left" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' />裡強壯的<WordSelector i="3" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' /></span>
@@ -54,6 +60,9 @@ export default {
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
       wordList,
+      pathWords,
+      pathFirstChoice: new Array(),
+      pathSecondChoice: new Array(),
       blankList: new Array(wordList.length),
       isLocked: false,
       url: '',
@@ -61,6 +70,14 @@ export default {
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
       //openWordSelectorIndex: -1,
+    }
+  },
+
+  beforeMount() {
+
+    for (let i = 0; i < pathWords.length; ++i) {
+      this.pathFirstChoice.push(0);
+      this.pathSecondChoice.push(-1);
     }
   },
 

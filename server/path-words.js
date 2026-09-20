@@ -1,4 +1,4 @@
-export default
+module.exports = 
 [
   ["Choose a $", ["path", "song", "friend"], ["I know", "unknown"]],
   ["With the $", ["trees", "mountains", "ocean"], ["I've always seen", "I've never seen"]],

@@ -1,5 +1,6 @@
 const partyManager = require('./party-manager')
 let wordList = require('./fei-words.js')
+let pathWords = require('./path-words.js')
 
 let state = {
   game: 'YenTing',
@@ -15,6 +16,14 @@ let state = {
     Guitar: 0,
     /*Bass: 0,*/
     Drums: 0
+  },
+
+  // Choices
+  choices: {
+    'ChoicesPath': {
+      openedBy: new Array(pathWords.length * 2),
+      choices: new Array(pathWords.length * 2)
+    }
   }
 }
 
@@ -48,6 +57,26 @@ module.exports = function(socketInstance) {
       socket.broadcast.emit('new state', state)
     }
 
+    function closeWordChoice() {
+      let gameState = state.choices[state.game];
+      if (gameState === undefined) {
+        console.warn("closing a word choice on a game without choices");
+        return;
+      }
+      let index = gameState.openedBy.indexOf(socket.id);
+
+      if (index === -1)
+        return;
+
+      while (index !== -1) {
+        gameState.openedBy[index] = null;
+        index = gameState.openedBy.indexOf(socket.id);
+      }
+
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+    }
+
     socket.on('join', function (cb) {
       cb(state)
     })
@@ -64,6 +93,13 @@ module.exports = function(socketInstance) {
         Guitar: 0,
         Bass: 0,
         Drums: 0,
+      }
+
+      state.choices.path.choices = new Array(pathWords.length * 2);
+      state.choices.path.openedBy = new Array(pathWords.length * 2);
+      for (let i = 0; i < pathWords.length; ++i) {
+        state.choices.path.choices[i * 2] = 0;
+        state.choices.path.choices[i * 2 + 1] = -1;
       }
 
       socket.emit('new state', state)
@@ -89,6 +125,22 @@ module.exports = function(socketInstance) {
     })
 
     socket.on('close word selector', closeWordSelector)
+
+    socket.on('open word choice', (i) => {
+      let gameState = state.choices[state.game];
+      if (gameState === undefined)
+        return;
+
+      if (gameState.openedBy.indexOf(socket.id) > -1)
+        closeWordChoice();
+
+      gameState.openedBy[i] = socket.id;
+
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+    });
+
+    socket.on('close word choice', closeWordChoice);
 
     socket.on('change game', (game) => {
       console.log('GAME  ', socket.id)
@@ -146,6 +198,17 @@ module.exports = function(socketInstance) {
       return callback()
     })
 
+    socket.on('submit choice', function (to, from, index, callback) {
+      console.log(`CHOICE for ${state.game}, by ${socket.id}, [${index}]:${from} => ${to}`);
+
+      state.choices[state.game].choices[index] = to;
+
+      // tell everybody about the new selected word
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+      return callback()
+    })
+
     socket.on('end round', function () {
       state.ravenState = 'results'
       io.emit('new state', state)
@@ -176,6 +239,7 @@ module.exports = function(socketInstance) {
 
     socket.on('disconnect', function (fn) {
       closeWordSelector()
+      closeWordChoice();
       console.log('BYE!  ', socket.id)
     })
   })

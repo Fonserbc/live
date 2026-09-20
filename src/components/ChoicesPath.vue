@@ -8,11 +8,13 @@
         </h1>
         <p v-for="(line, index) in pathWords" :key="index">
           {{ line[0].substring(0, line[0].indexOf("$")) }}
-          {{ line[1][pathFirstChoice[index]]}}
+          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
+          <!-- {{ line[1][pathFirstChoice[index]]}} -->
           {{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) }}
-          {{ line[2][pathSecondChoice[index]] }}
+          <!-- {{ line[2][pathSecondChoice[index]] }} -->
+          <WordChoice :id="index * 2 + 1" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices='line[2]' :openedBy="openedBy" :socket='socket' :syncChoices="pathChoices" :initialChoiceId="pathChoices[index * 2 + 1]"/>
         </p>
-        <p>
+        <!-- <p>
           <span>長頭髮的<WordSelector i="0" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='1' :wordList='wordList' :blankList='blankList' :socket='socket' />住在<WordSelector i="1" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' />裡</span>
           <span>討厭<WordSelector i="2" anchor="left" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' />裡強壯的<WordSelector i="3" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' /></span>
           <span>笑起來像<WordSelector i="4" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' /></span>
@@ -37,7 +39,7 @@
           <span>一切都<WordSelector i="23" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='4' :wordList='wordList' :blankList='blankList' :socket='socket' /></span>
           <span>可是永遠有人記得那個<WordSelector i="24" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='1' :wordList='wordList' :blankList='blankList' :socket='socket' />月</span>
           <span>非常非常地冷</span>
-        </p>
+        </p> -->
       </div>
     </div>
 
@@ -47,38 +49,31 @@
 <script>
 import QRCode from 'qrcode'
 import socket from '@/socket.js'
-import wordList from '@/fei-words.js'
 import pathWords from '@/path-words.js'
-import WordSelector from '@/components/WordSelector.vue'
+// import WordSelector from '@/components/WordSelector.vue'
+import WordChoice from '@/components/WordChoice.vue'
 
 
 export default {
-  components: { WordSelector },
+  components: { WordChoice },
   data() {
     return {
       socket: socket,
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
-      wordList,
       pathWords,
-      pathFirstChoice: new Array(),
-      pathSecondChoice: new Array(),
-      blankList: new Array(wordList.length),
+      pathChoices: new Array(pathWords.length * 2),
+      openedBy: new Array(pathWords.length * 2),
       isLocked: false,
       url: '',
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
-      //openWordSelectorIndex: -1,
+      openWordSelectorIndex: -1,
     }
   },
 
   beforeMount() {
-
-    for (let i = 0; i < pathWords.length; ++i) {
-      this.pathFirstChoice.push(0);
-      this.pathSecondChoice.push(-1);
-    }
   },
 
   mounted() {
@@ -87,11 +82,8 @@ export default {
     this.socket.on('connect', this.connect)
     this.socket.on('new state', this.setState)
     this.socket.emit('join', (state) => {
-      this.blankList = state.blankList
-      this.isLocked = state.isLocked
+      this.setState(state);
     })
-
-    // TODO populate with path words
   },
 
   beforeUnmount() {
@@ -102,6 +94,7 @@ export default {
       console.log('connected')
     },
     wordSelectorOpen(i) {
+      this.openWordSelectorIndex = i
     },
     wordSelectorClose() {
       this.openWordSelectorIndex = -1
@@ -122,7 +115,8 @@ export default {
     },
 
     setState(newState) {
-      this.blankList = newState.blankList
+      this.openedBy = newState.choices[newState.game].openedBy;
+      this.pathChoices = newState.choices[newState.game].choices;
       this.isLocked = newState.isLocked
     }
   },

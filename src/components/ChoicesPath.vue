@@ -6,11 +6,11 @@
         <h1 id="title">
           Path
         </h1>
-        <p v-for="(line, index) in pathWords" :key="index">
-          {{ line[0].substring(0, line[0].indexOf("$")) }}
-          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
+        <p v-for="(line, index) in pathWords" :key="index" class="line">
+          <span>{{ line[0].substring(0, line[0].indexOf("$")) }}</span>
+          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="(isLocked || pathState === 'half') && !isMod" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
           <!-- {{ line[1][pathFirstChoice[index]]}} -->
-          {{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) }}
+          <span>{{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) + " "}}</span>
           <!-- {{ line[2][pathSecondChoice[index]] }} -->
           <WordChoice :id="index * 2 + 1" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices='line[2]' :openedBy="openedBy" :socket='socket' :syncChoices="pathChoices" :initialChoiceId="pathChoices[index * 2 + 1]"/>
         </p>
@@ -65,6 +65,7 @@ export default {
       pathChoices: new Array(pathWords.length * 2),
       openedBy: new Array(pathWords.length * 2),
       isLocked: false,
+      pathState: 'half',
       url: '',
 
       // Only one WordSelector is allowed open at a time.
@@ -115,9 +116,13 @@ export default {
     },
 
     setState(newState) {
-      this.openedBy = newState.choices[newState.game].openedBy;
-      this.pathChoices = newState.choices[newState.game].choices;
+      let gameState = newState.choices[newState.game];
+      if (gameState !== undefined) {
+        this.openedBy = newState.choices[newState.game].openedBy;
+        this.pathChoices = newState.choices[newState.game].choices;
+      }
       this.isLocked = newState.isLocked
+      this.pathState = newState.pathState;
     }
   },
 }
@@ -129,9 +134,14 @@ export default {
   }
   p > span {
     display: block;
+    white-space: pre;
   }
   .partylink {
     padding: 0.5rem; display: inline-block;
+  }
+  .line {
+    display: flex;
+    flex-direction: line;
   }
 
   #poemcontainer {

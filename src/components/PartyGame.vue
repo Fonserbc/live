@@ -14,8 +14,10 @@
       </div>
       <div class="mod-panel__controls">
 
-        <button v-if="!isLocked && game === 'FillingIn'" @click="sendLock()" class="btn btn--mod">🔒 Lock</button>
-        <button v-if="isLocked && game === 'FillingIn'" @click="sendUnlock()" class="btn btn--mod">🔓 Unlock</button>
+        <button v-if="!isLocked && canGameBeLocked" @click="sendLock()" class="btn btn--mod">🔒 Lock</button>
+        <button v-if="isLocked && canGameBeLocked" @click="sendUnlock()" class="btn btn--mod">🔓 Unlock</button>
+        
+        <button v-if="game === 'ChoicesPath'" @click="togglePathState()" class="btn btn--mod">{{ pathState == 'half'? 'Open' : 'Close' }}</button>
 
         <!-- Raven buttons -->
         <button v-if="ravenState === 'voting' && game === 'Raven'" @click="confirmAction(endRound, 'end voting round?')" class="btn btn--mod">End Round</button>
@@ -61,7 +63,8 @@ export default {
       url: '',
 
       game: '',
-      ravenState: 'intro'
+      ravenState: 'intro',
+      pathState: 'half',
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
@@ -79,6 +82,12 @@ export default {
     game() {
       this.$nextTick(this.drawQRCodes)
     },
+  },
+
+  computed: {
+    canGameBeLocked() {
+      return this.game == 'FillingIn' || this.game == 'ChoicesPath';
+    }
   },
 
   mounted() {
@@ -103,45 +112,48 @@ export default {
   },
 
   methods: {
-  drawQRCodes() {
-    if (this.$refs.canvas) {
-      QRCode.toCanvas(this.$refs.canvas, this.url, {
-        scale: 8,
-        margin: 0,
-        color: {
-          dark: '#000',  // Blue dots
-          light: '#0000' // Transparent background
-        }
-      }, function (error) {
-        if (error) console.error(error)
-      })
-    }
+    togglePathState() {
+      this.socket.emit('toggle path state');
+    },
+    drawQRCodes() {
+      if (this.$refs.canvas) {
+        QRCode.toCanvas(this.$refs.canvas, this.url, {
+          scale: 8,
+          margin: 0,
+          color: {
+            dark: '#000',  // Blue dots
+            light: '#0000' // Transparent background
+          }
+        }, function (error) {
+          if (error) console.error(error)
+        })
+      }
 
-    if (this.$refs.canvasBig) {
-      QRCode.toCanvas(this.$refs.canvasBig, this.url, {
-        scale: 8,
-        margin: 0,
-        color: {
-          dark: '#000',  // Black dots
-          light: '#fff' // White bg
-        }
-      }, function (error) {
-        if (error) console.error(error)
-      })
-    }
-  },
-  endRound() {
-    this.socket.emit('end round')
-  },
-  startRound() {
-    this.socket.emit('start round')
-  },
-  endRaven() {
-    this.socket.emit('end game')
-  },
-  changeGame() {
-      this.socket.emit('change game', this.game)
-  },
+      if (this.$refs.canvasBig) {
+        QRCode.toCanvas(this.$refs.canvasBig, this.url, {
+          scale: 8,
+          margin: 0,
+          color: {
+            dark: '#000',  // Black dots
+            light: '#fff' // White bg
+          }
+        }, function (error) {
+          if (error) console.error(error)
+        })
+      }
+    },
+    endRound() {
+      this.socket.emit('end round')
+    },
+    startRound() {
+      this.socket.emit('start round')
+    },
+    endRaven() {
+      this.socket.emit('end game')
+    },
+    changeGame() {
+        this.socket.emit('change game', this.game)
+    },
     connect() {
       console.log('connected')
     },
@@ -189,6 +201,7 @@ export default {
       this.isLocked = newState.isLocked
       this.game = newState.game
       this.ravenState = newState.ravenState
+      this.pathState = newState.pathState;
     }
   },
 }

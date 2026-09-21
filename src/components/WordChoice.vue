@@ -40,6 +40,7 @@ export default {
         'word-selector': true,
         'word-selector--is-being-edited': this.isBeingEdited,
         'word-selector--is-being-edited-by-me': this.isBeingEditedByMe,
+        'locked': this.isLocked,
       }
     },
     "underscores": function() {
@@ -88,7 +89,7 @@ export default {
   data() {
     return {
       isWordListOpen: false,
-      lengthClass: `word-group word-group--length-4`,//${this.length}`,
+      lengthClass: `word-group`,//word-group--length-4${this.length}`,
       wordListClass: 'word-list',
     }
   },
@@ -96,9 +97,12 @@ export default {
 </script>
 
 <style>
-  button {
+  .word-group > button {
     display: inline-block;
     color: inherit;
+    margin: 0.5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
 
   .word-selector {
@@ -110,6 +114,10 @@ export default {
 
   .word-present {
     color: #45818E;
+  }
+
+  .locked > .word-present {
+    color: unset;
   }
 
   @keyframes blink {
@@ -205,8 +213,11 @@ export default {
 
   .word-group {
     text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
   }
-  .word-group {
+  /* .word-group {
   }
   .word-group--length-1 {
     width: 8.5em;
@@ -228,7 +239,7 @@ export default {
   .word-group--length-4 button {
     width: 4.5em;
     height: 2.2em;
-  }
+  } */
 
 
 </style>

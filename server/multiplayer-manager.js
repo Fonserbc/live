@@ -11,6 +11,7 @@ let state = {
 
   // Raven
   ravenState: 'intro',
+  pathState: 'half',
   votes: {
     Piano: 0,
     Guitar: 0,
@@ -25,6 +26,11 @@ let state = {
       choices: new Array(pathWords.length * 2)
     }
   }
+}
+
+for (let i = 0; i < pathWords.length; ++i) {
+  state.choices.ChoicesPath.choices[i * 2] = 0;
+  state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
 }
 
 function deepCopy(data) {
@@ -95,11 +101,11 @@ module.exports = function(socketInstance) {
         Drums: 0,
       }
 
-      state.choices.path.choices = new Array(pathWords.length * 2);
-      state.choices.path.openedBy = new Array(pathWords.length * 2);
+      state.choices.ChoicesPath.choices = new Array(pathWords.length * 2);
+      state.choices.ChoicesPath.openedBy = new Array(pathWords.length * 2);
       for (let i = 0; i < pathWords.length; ++i) {
-        state.choices.path.choices[i * 2] = 0;
-        state.choices.path.choices[i * 2 + 1] = -1;
+        state.choices.ChoicesPath.choices[i * 2] = 0;
+        state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
       }
 
       socket.emit('new state', state)
@@ -231,6 +237,12 @@ module.exports = function(socketInstance) {
 
       io.emit('new state', state)
     })
+
+    socket.on('toggle path state', function() {
+      state.pathState = state.pathState != 'half'? 'half' : 'full';
+
+      io.emit('new state', state)
+    });
 
     socket.on('send vote', function (instrument) {
       state.votes[instrument] += 1

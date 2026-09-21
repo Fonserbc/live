@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <canvas v-if="game !== 'YenTing'" ref="canvas" class="qrcode" :class="{ qrcodescreen: isScreen }"></canvas>
+    <canvas v-if="game !== 'YenTing' && isScreen" ref="canvas" class="qrcode" :class="{ qrcodescreen: isScreen }"></canvas>
 
     <component :is="game" />
 

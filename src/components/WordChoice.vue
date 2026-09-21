@@ -9,7 +9,7 @@
 
     -->
     <span :class="classObject">
-      <button v-if="!isLocked && !isBeingEdited" @click="openWordList" :class="{ 'word-present': choiceId >= 0 }">
+      <button v-if="!isLocked && !isBeingEdited" @click="openWordList" :class="{ 'word-present': choiceId >= 0, 'first-word': id % 2 == 0}">
         {{ word || underscores }}
       </button>
       <button @click="closeWordList" :class="{ 'word-present': choiceId >= 0}" v-else>
@@ -84,6 +84,7 @@ export default {
           alert(err.err)
         }
       })
+      this.closeWordList();
     },
   },
   data() {
@@ -114,6 +115,10 @@ export default {
 
   .word-present {
     color: #45818E;
+  }
+
+  .word-present.first-word {
+    color: #e05f0e;
   }
 
   .locked > .word-present {

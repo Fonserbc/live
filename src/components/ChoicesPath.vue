@@ -142,6 +142,7 @@ export default {
   .line {
     display: flex;
     flex-direction: line;
+    margin-bottom: 1rem;
   }
 
   #poemcontainer {
@@ -151,7 +152,7 @@ export default {
     line-height: 1.3;
 
     font-size: 1.2rem;
-    padding: 0.5em 0.5em 9em;
+    padding: 0.5em 0.5em 1em;
   }
   @media (min-width: calc(336px)) {
     #poemcontainer {

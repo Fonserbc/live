@@ -3,6 +3,8 @@ let wordList = require('./fei-words.js')
 let pathWords = require('./path-words.js')
 
 let state = {
+  // Player
+
   game: 'YenTing',
 
   // FillingIn
@@ -30,7 +32,7 @@ let state = {
   // Numbers
   numbers: {
     selectedId: -1,
-    map: new Map(),
+    map: new Array(),
   }
 }
 
@@ -114,6 +116,9 @@ module.exports = function(socketInstance) {
         state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
       }
 
+      state.numbers.selectedId = -1;
+      state.numbers.map = new Array();
+
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
     })
@@ -155,14 +160,32 @@ module.exports = function(socketInstance) {
     socket.on('close word choice', closeWordChoice);
 
     socket.on('send numbers', (n) => {
-      state.numbers.map.set(socket.id, n);
+      let it = -1;
+      let map = state.numbers.map;
+      for (let i = 0; i < map.length; ++i)
+      {
+        if (map[i][0] == socket.id)
+        {
+          it = i;
+          break;
+        }
+      }
+
+      if (it == -1) {
+        state.numbers.map.push([socket.id, n]);
+      }
+      else {
+        state.numbers.map[it][1] = n;
+      }
+      
       socket.emit('new state', state);
-      console.log(socket.id, "send numbers", n);
+      socket.broadcast.emit('new state', state)
     });
 
     socket.on('select number', (id) => {
       state.numbers.selectedId = id;
       socket.emit('new state', state);
+      socket.broadcast.emit('new state', state)
     });
 
     socket.on('change game', (game) => {

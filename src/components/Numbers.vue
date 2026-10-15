@@ -3,13 +3,22 @@
     <h1 id="title">
       Numbers
     </h1>
-    <div id="player-number-container" :class="{'sent-container': numbersSent}">
+    <div id="player-number-container" :class="{'sent-container': numbersLocked}">
       <div v-for="number in currentNumbers" :class="['number-'+number, numberClassObject]">
         {{ number }}
       </div>
     </div>
+    
+    <div v-if="!canInputNumbers" id="number-list">
+      <div v-for="[id, numbers] in playerNumbers" :class="['player-number', {'selected-player-numbers': id ==selectedId}]" @click="playerNumbersPressed(id)">
+        <div v-for="number in numbers" :class="['number-'+number, numberClassObject]">
+          {{ number }}
+        </div>
+      </div>
+      
+    </div>
   </div>
-  <div id="input-container">
+  <div v-if="canInputNumbers" id="input-container">
     <div id="input-main">
       <div class="input-space"></div>
       <div id="input-numbers-container">
@@ -30,7 +39,7 @@
         </div>
       </div>
       <div class="input-space">
-        <div class="input-button" @click="deletePressed()">␡</div>
+        <div class="input-button" @click="deletePressed()">⌫</div>
       </div>
     </div>
     <div class="input-button" @click="sendPressed()">✓</div>
@@ -49,7 +58,9 @@ export default {
       isScreen: this.$route.query.role === 'screen',
       url: '',
       currentNumbers: [],
-      numbersSent: false,
+      numbersLocked: false,
+      playerNumbers: new Map(),
+      selectedId: -1,
     }
   },
 
@@ -59,11 +70,11 @@ export default {
   mounted() {
     this.url = window.location.protocol + '//' + window.location.host + window.location.pathname
 
-    this.socket.on('connect', this.connect)
-    this.socket.on('new state', this.setState)
+    this.socket.on('connect', this.connect);
+    this.socket.on('new state', this.setState);
     this.socket.emit('join', (state) => {
       this.setState(state);
-    })
+    });
   },
 
   beforeUnmount() {
@@ -73,8 +84,11 @@ export default {
     numberClassObject() {
       return {
         'player-number': true,
-        'unsent-number': !this.numbersSent,
+        'unsent-number': !this.numbersLocked,
       }
+    },
+    canInputNumbers() {
+      return !this.isMod && !this.isScreen;
     }
   },
 
@@ -91,26 +105,55 @@ export default {
       this.socket.emit('send reset')
     },
     setState(newState) {
-      let gameState = newState.choices[newState.game];
-      
+      this.playerNumbers = new Map(newState.numbers.map);
+      this.selectedId = newState.numbers.selectedId;
+      if (!this.canInputNumbers) {
+        if (this.selectedId == -1 || !this.playerNumbers.has(this.selectedId)) {
+          this.currentNumbers = [];
+          this.numbersLocked = false;
+        }
+        // else {
+        //   this.currentNumbers = this.playerNumbers.get(this.selectedId);
+        //   this.numbersLocked = true;
+        // }
+      }
     },
     numberPressed(n)
     {
       if (this.currentNumbers.length < 10) {
         this.currentNumbers.push(n);
-        this.numbersSent = false;
+        this.numbersLocked = false;
       }
     },
     deletePressed()
     {
       this.currentNumbers.pop();
-      this.numbersSent = false;
+      this.numbersLocked = false;
     },
     sendPressed()
     {
       this.socket.emit('send numbers', this.currentNumbers);
-      this.numbersSent = true;
-    }
+      this.numbersLocked = true;
+    },
+    playerNumbersPressed(id)
+    {
+      if (!this.isMod) return;
+      
+      if (!this.playerNumbers.has(id) || this.selectedId == id)
+      {
+        this.selectedId = -1;
+        this.currentNumbers = [];
+        this.numbersLocked = false;
+      }
+      else if (this.selectedId == -1)
+      {
+        this.selectedId = id;
+        this.numbersLocked = true;
+        this.currentNumbers = this.playerNumbers.get(id);
+      }
+
+      this.socket.emit('select number', this.selectedId);
+    },
   },
 }
 </script>

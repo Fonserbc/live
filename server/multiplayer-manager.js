@@ -25,6 +25,12 @@ let state = {
       openedBy: new Array(pathWords.length * 2),
       choices: new Array(pathWords.length * 2)
     }
+  },
+
+  // Numbers
+  numbers: {
+    selectedId: -1,
+    map: new Map(),
   }
 }
 
@@ -147,6 +153,17 @@ module.exports = function(socketInstance) {
     });
 
     socket.on('close word choice', closeWordChoice);
+
+    socket.on('send numbers', (n) => {
+      state.numbers.map.set(socket.id, n);
+      socket.emit('new state', state);
+      console.log(socket.id, "send numbers", n);
+    });
+
+    socket.on('select number', (id) => {
+      state.numbers.selectedId = id;
+      socket.emit('new state', state);
+    });
 
     socket.on('change game', (game) => {
       console.log('GAME  ', socket.id)

@@ -10,6 +10,7 @@
           <option>FillingIn</option>
           <option>ChoicesPath</option>
           <option>Raven</option>
+          <option>Numbers</option>
         </select>
       </div>
       <div class="mod-panel__controls">
@@ -48,10 +49,11 @@ import FillingIn from './FillingIn.vue'
 import ChoicesPath from './ChoicesPath.vue'
 import Raven from './Raven.vue'
 import YenTing from './YenTing.vue'
+import Numbers from './Numbers.vue'
 
 
 export default {
-  components: { FillingIn, Raven, YenTing, ChoicesPath },
+  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers },
   data() {
     return {
       socket: socket,

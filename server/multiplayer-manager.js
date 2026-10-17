@@ -33,6 +33,9 @@ let state = {
 let displayState = {
   // Numbers
   playerNumbers: new Array(),
+
+  // Order
+  orderedSentences: new Array(),
 }
 
 for (let i = 0; i < pathWords.length; ++i) {
@@ -122,7 +125,8 @@ module.exports = function(socketInstance) {
         state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
       }
 
-      displayState.playerNumbers = [];
+      displayState.playerNumbers = new Array();
+      displayState.orderedSentences = new Array();
 
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
@@ -174,6 +178,19 @@ module.exports = function(socketInstance) {
       let id = socket.id + Date.now();
 
       displayState.playerNumbers.push([n, id]);
+      
+      io.to('display channel').emit('new display state', displayState);
+    });
+
+    socket.on('send order', (sentence) => {
+
+      let s = "";
+      for (let i = 0; i < sentence.length; ++i) {
+        if (i != 0) s += " ";
+        s += sentence[i][1];
+      }
+      s = s.charAt(0).toUpperCase() + s.slice(1);
+      displayState.orderedSentences.push(s);
       
       io.to('display channel').emit('new display state', displayState);
     });

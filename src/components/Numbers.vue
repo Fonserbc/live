@@ -56,6 +56,7 @@ export default {
       socket: socket,
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
+      isMusician: this.$route.query.role === 'musician',
       url: '',
       currentNumbers: [],
       numbersLocked: false,
@@ -89,7 +90,7 @@ export default {
       }
     },
     canInputNumbers() {
-      return !this.isMod && !this.isScreen;
+      return !this.isMod && !this.isScreen && !this.isMusician;
     },
     canSendNumbers() {
       return this.currentNumbers.length > 1 && !this.numbersLocked;

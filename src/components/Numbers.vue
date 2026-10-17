@@ -3,15 +3,15 @@
     <h1 id="title">
       Numbers
     </h1>
-    <div id="player-number-container" :class="{'sent-container': numbersLocked}">
+    <div v-if="canInputNumbers" id="player-number-container" :class="{'sent-container': numbersLocked}">
       <div v-for="number in currentNumbers" :class="['number-'+number, numberClassObject]">
         {{ number }}
       </div>
     </div>
     
-    <div v-if="!canInputNumbers" id="number-list">
-      <div v-for="[id, numbers] in playerNumbers" :class="['player-number', {'selected-player-numbers': id ==selectedId}]" @click="playerNumbersPressed(id)">
-        <div v-for="number in numbers" :class="['number-'+number, numberClassObject]">
+    <div v-if="!canInputNumbers" id="player-numbers">
+      <div v-for="([numbers, nid], index) in playerNumbers" :key="nid" :class="{'list-numbers-container': true, 'sent-container': index == playerNumbers.length - 1}">
+        <div v-for="number in numbers" :class="['number-'+number, 'player-number', index < playerNumbers.length - 1? 'unsent-number' : null]">
           {{ number }}
         </div>
       </div>
@@ -42,7 +42,7 @@
         <div class="input-button" @click="deletePressed()">⌫</div>
       </div>
     </div>
-    <div class="input-button" @click="sendPressed()">✓</div>
+    <div id="send-button" class="input-button" @click="sendPressed()" :class="{'send-disabled': !canSendNumbers}">✓</div>
   </div>
 </template>
 
@@ -59,7 +59,7 @@ export default {
       url: '',
       currentNumbers: [],
       numbersLocked: false,
-      playerNumbers: new Map(),
+      playerNumbers: [],
       selectedId: -1,
     }
   },
@@ -75,6 +75,7 @@ export default {
     this.socket.emit('join', (state) => {
       this.setState(state);
     });
+    this.socket.on('new display state', this.newDisplayState);
   },
 
   beforeUnmount() {
@@ -89,6 +90,9 @@ export default {
     },
     canInputNumbers() {
       return !this.isMod && !this.isScreen;
+    },
+    canSendNumbers() {
+      return this.currentNumbers.length > 1 && !this.numbersLocked;
     }
   },
 
@@ -105,55 +109,37 @@ export default {
       this.socket.emit('send reset')
     },
     setState(newState) {
-      this.playerNumbers = new Map(newState.numbers.map);
-      this.selectedId = newState.numbers.selectedId;
-      if (!this.canInputNumbers) {
-        if (this.selectedId == -1 || !this.playerNumbers.has(this.selectedId)) {
-          this.currentNumbers = [];
-          this.numbersLocked = false;
-        }
-        // else {
-        //   this.currentNumbers = this.playerNumbers.get(this.selectedId);
-        //   this.numbersLocked = true;
-        // }
-      }
+      
     },
     numberPressed(n)
     {
-      if (this.currentNumbers.length < 10) {
+      if (!this.numbersLocked && this.currentNumbers.length < 10) {
         this.currentNumbers.push(n);
-        this.numbersLocked = false;
       }
     },
     deletePressed()
     {
-      this.currentNumbers.pop();
-      this.numbersLocked = false;
+      if (!this.numbersLocked)
+        this.currentNumbers.pop();
     },
     sendPressed()
     {
+      if (this.currentNumbers.length < 2)
+        return; // TODO ask for more numbers
       this.socket.emit('send numbers', this.currentNumbers);
       this.numbersLocked = true;
-    },
-    playerNumbersPressed(id)
-    {
-      if (!this.isMod) return;
-      
-      if (!this.playerNumbers.has(id) || this.selectedId == id)
-      {
-        this.selectedId = -1;
-        this.currentNumbers = [];
-        this.numbersLocked = false;
-      }
-      else if (this.selectedId == -1)
-      {
-        this.selectedId = id;
-        this.numbersLocked = true;
-        this.currentNumbers = this.playerNumbers.get(id);
-      }
 
-      this.socket.emit('select number', this.selectedId);
+      setTimeout(this.clearNumbers, 1300)
     },
+    clearNumbers()
+    {
+      this.numbersLocked = false;
+      this.currentNumbers = [];
+    },
+    newDisplayState(newDisplayState)
+    {
+      this.playerNumbers = newDisplayState.playerNumbers;
+    }
   },
 }
 </script>
@@ -184,6 +170,28 @@ export default {
     transition: all 0.3s;
     height: 3.65rem;
   }
+  #player-numbers {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: start;
+    justify-content: center;
+  }
+  .list-numbers-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-shrink: 1;
+    align-items: start;
+    justify-content: center;
+
+    background-color: rgba(1,1,1,0);
+    border-radius: 1rem;
+    padding-left: 1em;
+    padding-right: 1em;
+    height: 3.65rem;
+    transition: unset;
+  }
   .player-number {
     display: flex;
     font-size: 2rem;
@@ -211,6 +219,12 @@ export default {
     flex-direction: row;
     display: flex;
   }
+  #number-list {
+    flex-direction: column-reverse;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .input-button {
     transition: all 0.2s;
     border-radius: 1rem;
@@ -227,6 +241,17 @@ export default {
     box-shadow: 0rem 0rem rgba(0,0,0,0.5);
     transform: scale(0.87);
     background-color: #AACCFF;
+  }
+  #send-button {
+    background-color: lightgreen;
+  }
+  #send-button.send-disabled {
+    background-color: white;
+  }
+  #send-button.send-disabled:active {
+    background-color: #FF7777;
+    transform: scale(0.87);
+    box-shadow: 0rem 0rem rgba(0,0,0,0.5);
   }
   .input-space {
     margin:0.5rem;
@@ -277,9 +302,14 @@ export default {
     top: 0%;
   }
   #player-number-container.sent-container {
-    height: 10rem;
+    height: 7rem;
     padding-bottom: 2.75rem;
     transition: all 0.3s;
+    background-color: lightgreen;
+  }
+  .list-numbers-container.sent-container {
+    height: 7rem;
+    padding-bottom: 2.75rem;
     background-color: lightgreen;
   }
   @media (min-width: calc(336px)) {

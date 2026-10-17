@@ -99,12 +99,11 @@ export default {
 
     this.socket.on('connect', this.connect)
     this.socket.on('new state', this.setState)
+    this.socket.on('new display state', this.setDisplayState)
     this.socket.on('end party', this.receivePartyEnd)
-    this.socket.emit('join', (state) => {
-      this.blankList = state.blankList
-      this.isLocked = state.isLocked
-      this.game = state.game
-    })
+    if (this.$route.query.role !== undefined)
+      this.socket.emit('report role', this.$route.query.role);
+    this.socket.emit('join');
   },
 
   beforeUnmount() {
@@ -204,6 +203,10 @@ export default {
       this.game = newState.game
       this.ravenState = newState.ravenState
       this.pathState = newState.pathState;
+    },
+
+    setDisplayState(newDisplayState) {
+      //console.log("received new display state")
     }
   },
 }

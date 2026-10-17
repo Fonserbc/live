@@ -16,7 +16,7 @@
   </span>
 </template>
 
-<script>
+<script scoped>
 export default {
   props: ['length', 'anchor', 'wordList', 'blankList', 'socket', 'isLocked', 'i'],
   data() {

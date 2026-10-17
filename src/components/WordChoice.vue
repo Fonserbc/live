@@ -97,7 +97,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   .word-group > button {
     display: inline-block;
     color: inherit;

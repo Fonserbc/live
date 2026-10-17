@@ -9,10 +9,11 @@
           <option>YenTing</option>
           <option>FillingIn</option>
           <option>ChoicesPath</option>
-          <option>Raven</option>
+          <!-- <option>Raven</option> -->
           <option>Numbers</option>
           <option>Order</option>
           <option>Voting</option>
+          <option>Love</option>
         </select>
       </div>
       <div class="mod-panel__controls">
@@ -27,6 +28,7 @@
         <button v-if="(ravenState === 'results' || ravenState === 'intro') && game === 'Raven'" @click="confirmAction(startRound, 'start round?')" class="btn btn--mod">Start Round</button>
         <button v-if="ravenState === 'end' && game === 'Raven'" @click="confirmAction(sendReset, 'Are you sure you want to reset everything?')" class="btn btn--mod">Back to intro</button>
         <button v-if="ravenState === 'results' && game === 'Raven'" @click="confirmAction(endRaven,'end raven?')" class="btn btn--mod">End song</button>
+        <button v-if="game === 'Order'" @click="confirmAction(changeOrderLanguage,'change language?')" class="btn btn--mod">{{ this.orderEnglishWords? "En" : "Zh" }}</button>
 
         <button v-if="game !== 'Raven'" @click="offerReset()" class="btn btn--mod">🔄 Reset</button>
         <button v-if="game === 'YenTing'" @click="endPartyConfirm()" class="btn btn--mod btn--danger">🛑 End Party: {{ this.$route.params.party }}</button>
@@ -71,6 +73,8 @@ export default {
       game: '',
       ravenState: 'intro',
       pathState: 'half',
+
+      orderEnglishWords: true,
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
@@ -200,6 +204,9 @@ export default {
     sendUnlock() {
       this.socket.emit('unlock state')
     },
+    changeOrderLanguage() {
+      this.socket.emit('change order language');
+    },
 
     setState(newState) {
       this.blankList = newState.blankList
@@ -207,6 +214,7 @@ export default {
       this.game = newState.game
       this.ravenState = newState.ravenState
       this.pathState = newState.pathState;
+      this.orderEnglishWords = newState.orderEnglishWords;
     },
 
     setDisplayState(newDisplayState) {

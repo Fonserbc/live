@@ -28,6 +28,9 @@ let state = {
       choices: new Array(pathWords.length * 2)
     }
   },
+
+  // Order
+  orderEnglishWords: true,
 }
 
 let displayState = {
@@ -131,6 +134,14 @@ module.exports = function(socketInstance) {
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
       io.to('display channel').emit('new display state', displayState)
+      io.emit('reset local')
+    })
+
+    socket.on('change order language', () => {
+      state.orderEnglishWords = !state.orderEnglishWords;
+      
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
     })
 
     socket.on('end party', (id) => {
@@ -183,14 +194,7 @@ module.exports = function(socketInstance) {
     });
 
     socket.on('send order', (sentence) => {
-
-      let s = "";
-      for (let i = 0; i < sentence.length; ++i) {
-        if (i != 0) s += " ";
-        s += sentence[i][1];
-      }
-      s = s.charAt(0).toUpperCase() + s.slice(1);
-      displayState.orderedSentences.push(s);
+      displayState.orderedSentences.push(sentence);
       
       io.to('display channel').emit('new display state', displayState);
     });

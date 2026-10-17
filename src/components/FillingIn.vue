@@ -109,7 +109,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   p {
     margin: 0 0 2rem;
   }

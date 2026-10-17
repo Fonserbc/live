@@ -187,7 +187,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .vote-btn {
   background: white;
   border-radius: 0 0 8px 8px;

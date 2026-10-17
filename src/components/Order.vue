@@ -1,9 +1,20 @@
 <template>
   <div id="container">
     <h1 id="title">
-      Word Order
+      Ordered Sentence
     </h1>
-    <div v-if="canInputWords" id="player-order-container">
+    <div v-if="canInputWords && !areWordsSent" id="explanation">
+      Form a sentence. You can only submit once.
+    </div>
+    <div v-if="canInputWords && areWordsSent" id="after-sent">
+      <div id="sent-words-container">
+        <div v-for="([id, word], index) in chosenWords" :key="id" class="sent-word"">
+          {{ word }}
+        </div>
+      </div>
+      <div id="sent-info">Sent ✓</div>
+    </div>
+    <div v-if="canInputWords && !areWordsSent" id="player-order-container">
       <div v-for="([id, word], index) in chosenWords" :key="id" class="word-button" @click="unchooseWord(index)">
         {{ word }}
       </div>
@@ -16,13 +27,13 @@
       </div> 
     </div>
   </div>
-  <div v-if="canInputWords" id="input-container">
+  <div v-if="canInputWords && !areWordsSent" id="input-container">
     <div id="input-main">
       <div v-for="([id, word], index) in unchosenWords" :key="id" class="word-button" @click="chooseWord(index)">
         {{ word }}
       </div>
     </div>
-    <div id="send-button" class="input-button" @click="sendPressed()" :class="{'send-disabled': !canSendOrder}">✓</div>
+    <div id="send-button" class="input-button" @click="sendPressed()" :class="{'send-disabled': !canSendOrder}">Submit</div>
   </div>
 </template>
 
@@ -32,7 +43,7 @@ import socket from '@/socket.js'
 const wordsEng = ["wiser", "what", "I", "you", "think", "it", "than", "how", "change", "know", "is", "of"];
 const wordsZh = ["我", "懂", "你", "更", "的", "又", "愛", "了", "白", "想"];
 
-let words = wordsEng;
+// Only send one sentence per player once
 
 export default {
   data() {
@@ -45,15 +56,14 @@ export default {
       unchosenWords: [],
       chosenWords: [],
       orderedSentences: [],
+      areWordsSent: false,
+      englishWords: true,
+      words: [],
     }
   },
 
   beforeMount() {
-    this.unchosenWords = [];
-    this.chosenWords = []
-    for (let i = 0; i < words.length; ++i) {
-      this.unchosenWords.push([i, words[i]]);
-    }
+    this.init();
   },
 
   mounted() {
@@ -65,6 +75,7 @@ export default {
       this.setState(state);
     });
     this.socket.on('new display state', this.newDisplayState);
+    this.socket.on('reset local', this.resetLocal);
   },
 
   beforeUnmount() {
@@ -75,21 +86,45 @@ export default {
       return !this.isMod && !this.isScreen && !this.isMusician;
     },
     canSendOrder() {
-      return this.unchosenWords.length == 0;
+      return this.chosenWords.length >= 3 && !this.areWordsSent;
     }
   },
 
   methods: {
-    offerReset() {
-      if (confirm('Are you sure you want to reset everything?')) {
-        this.sendReset()
-      }
+    init() {
+        let words = this.englishWords? wordsEng : wordsZh;
+        this.unchosenWords = [];
+        this.chosenWords = [];
+        let order = [];
+        for (let i = 0; i < words.length; ++i) {
+          order.push(i);
+        }
+        
+        for (let i = order.length; i > 0; --i)
+        {
+          let r = Math.floor(Math.random() * i);
+          
+          let aux = order[i - 1];
+          order[i - 1] = order[r];
+          order[r] = aux;
+        }
+
+        for (let r = 0; r < order.length; ++r)
+        {
+          let i = order[r];
+          this.unchosenWords.push([i, words[i]]);
+        }
+
+        this.areWordsSent = false;
     },
-    sendReset() {
-      this.socket.emit('send reset')
+    resetLocal() {
+      this.init();
     },
     setState(newState) {
-      
+      let wasEnglish = this.englishWords;
+      this.englishWords = newState.orderEnglishWords;
+      if (wasEnglish != this.englishWords)
+        this.resetLocal();
     },
     chooseWord(it)
     {
@@ -106,8 +141,20 @@ export default {
       if (!this.canSendOrder || !this.canInputWords)
         return;
 
-      console.log("send words");
-      this.socket.emit('send order', this.chosenWords);
+      let s = "";
+      let isEnglishSentence = this.englishWords;
+      for (let i = 0; i < this.chosenWords.length; ++i) {
+        if (isEnglishSentence && i != 0) s += " ";
+        s += this.chosenWords[i][1];
+      }
+      if (isEnglishSentence)
+        s = s.charAt(0).toUpperCase() + s.slice(1);
+
+      if (confirm(`send "${s}"?`))
+      {
+        this.socket.emit('send order', s);
+        this.areWordsSent = true;
+      }
     },
     newDisplayState(newDisplayState)
     {
@@ -117,7 +164,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   #container {
     min-width: 10em;
     width: 100%;
@@ -127,6 +174,10 @@ export default {
 
     font-size: 1.2rem;
     padding: 0.5em 0.5em 1em;
+    text-align: center;
+  }
+  h1 {
+    text-align: center;
   }
   #input-container {
     position: absolute;
@@ -173,14 +224,29 @@ export default {
   }
   #send-button {
     background-color: lightgreen;
-    aspect-ratio: 1;
-    width: 8vh;
+    transition: all 0.2s;
+    border-radius: 1rem;
+    box-shadow: 0.25rem 0.25rem rgba(0,0,0,0.5);
+    text-align: center;
+    font-size: 2rem;
+    margin: 0.5rem;
+    transform: scale(1);
+    margin-top: 2rem;
+    padding: 0.5rem;
+    color: black;
+  }
+  #send-button:active {
+    background-color: lightgreen;
+    box-shadow: 0rem 0rem rgba(0,0,0,0.5);
+    transform: scale(0.87);
   }
   #send-button.send-disabled {
-    background-color: white;
+    background-color: black;
+    opacity: 0.7;
+    color: darkgray;
   }
   #send-button.send-disabled:active {
-    background-color: #FF7777;
+    background-color: #783737;
     transform: scale(0.87);
     box-shadow: 0rem 0rem rgba(0,0,0,0.5);
   }
@@ -202,14 +268,31 @@ export default {
   }
 
   #player-order-container {
+    margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  #sent-words-container {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .sent-word {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
   }
 
   #sentences-container {
     display: flex;
     flex-wrap: nowrap;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   .sentence {
     display: flex;

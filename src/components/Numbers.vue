@@ -145,7 +145,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   #container {
     min-width: 10em;
     font-family: 'Noto Sans TC', sans-serif;

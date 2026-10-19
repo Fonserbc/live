@@ -1,7 +1,7 @@
 <template>
   <div id="container">
     <h1 id="title">
-      Love Letter
+      Writting Love
     </h1>
     <!-- <div v-if="canInputWords && languageChosen && !areWordsSent" id="explanation">
       Fill in the words in this love letter
@@ -50,7 +50,7 @@ const wordsEn = [
   "＿ in the ＿ reminds me of you.",
   "＿ speaks of you, and your ＿ is everywhere.",
   "I'll never forget the way ＿ start ＿ when you're around",
-  "Your favorite ＿ is what I'll ＿ for,",
+  "Your favorite ＿ is what I'll ＿,",
   "as the ＿ gets ＿ when you're gone.",
 
   "Sincerely, ＿."
@@ -177,7 +177,7 @@ export default {
         let line = this.processedLines[i];
         for (let j = 0; j < line.length; ++j) {
           if (Number.isInteger(line[j]))
-            s += this.writtenWords[line[j]];
+            s += this.writtenWords[line[j]].trim();
           else s += line[j];
         }
         s += "\n";
@@ -196,6 +196,7 @@ export default {
     {
       this.loveLetters = newDisplayState.loveLetters;
       this.loveLetterId = newDisplayState.loveLetterId;
+      this.loveLettersSeen = newDisplayState.loveLettersSeen;
     },
     showNextLetter() {
       if (this.isMod)

@@ -15,7 +15,7 @@
       <div id="sent-info">Sent ✓</div>
     </div>
     <div v-if="canInputWords && !areWordsSent" id="player-order-container">
-      <div v-for="([id, word], index) in chosenWords" :key="id" class="word-button" @click="unchooseWord(index)">
+      <div v-for="([id, word], index) in chosenWords" :key="id" class="button" @click="unchooseWord(index)">
         {{ word }}
       </div>
     </div>
@@ -29,11 +29,11 @@
   </div>
   <div v-if="canInputWords && !areWordsSent" id="input-container">
     <div id="input-main">
-      <div v-for="([id, word], index) in unchosenWords" :key="id" class="word-button" @click="chooseWord(index)">
+      <div v-for="([id, word], index) in unchosenWords" :key="id" class="button" @click="chooseWord(index)">
         {{ word }}
       </div>
     </div>
-    <div id="send-button" class="input-button" @click="sendPressed()" :class="{'send-disabled': !canSendOrder}">Submit</div>
+    <div id="send-button" class="input-button" @click="sendPressed()" :class="{'button': true, 'send-disabled': !canSendOrder}">Submit</div>
   </div>
 </template>
 
@@ -200,39 +200,11 @@ export default {
     align-items: center;
     justify-content: center;
   }
-  .word-button {
-    flex-grow: 0;
-    flex-shrink: 1;
-    flex-basis: content;
-    transition: all 0.2s;
-    border-radius: 1rem;
-    background-color: white;
-    box-shadow: 0.25rem 0.25rem rgba(0,0,0,0.5);
-    /* height: 8vh; */
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    margin-left: 0.25rem;
-    margin-right: 0.25rem;
-    padding: 0.5rem;
-    transform: scale(1);
-  }
-  .word-button:active {
-    box-shadow: 0rem 0rem rgba(0,0,0,0.5);
-    transform: scale(0.87);
-    background-color: #AACCFF;
-  }
   #send-button {
     background-color: lightgreen;
-    transition: all 0.2s;
-    border-radius: 1rem;
     box-shadow: 0.25rem 0.25rem rgba(0,0,0,0.5);
-    text-align: center;
-    font-size: 2rem;
     margin: 0.5rem;
-    transform: scale(1);
     margin-top: 2rem;
-    padding: 0.5rem;
     color: black;
   }
   #send-button:active {

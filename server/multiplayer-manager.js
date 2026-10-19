@@ -39,6 +39,11 @@ let displayState = {
 
   // Order
   orderedSentences: new Array(),
+
+  // Love
+  loveLetters: new Array(),
+  loveLetterId: -1,
+  loveLettersSeen: 0,
 }
 
 for (let i = 0; i < pathWords.length; ++i) {
@@ -130,6 +135,9 @@ module.exports = function(socketInstance) {
 
       displayState.playerNumbers = new Array();
       displayState.orderedSentences = new Array();
+      displayState.loveLetters = new Array();
+      displayState.loveLetterId = -1;
+      displayState.loveLettersSeen = 0;
 
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
@@ -196,6 +204,19 @@ module.exports = function(socketInstance) {
     socket.on('send order', (sentence) => {
       displayState.orderedSentences.push(sentence);
       
+      io.to('display channel').emit('new display state', displayState);
+    });
+
+    socket.on('send letter', (sentence) => {
+      displayState.loveLetters.push(sentence);
+      
+      io.to('display channel').emit('new display state', displayState);
+    });
+    
+    socket.on('visualize letter', (id, seenCount) => {
+      displayState.loveLetterId = id;
+      displayState.loveLettersSeen = seenCount;
+
       io.to('display channel').emit('new display state', displayState);
     });
 

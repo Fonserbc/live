@@ -56,10 +56,11 @@ import YenTing from './YenTing.vue'
 import Numbers from './Numbers.vue'
 import Order from './Order.vue'
 import Voting from './Voting.vue'
+import Love from './Love.vue'
 
 
 export default {
-  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting },
+  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love },
   data() {
     return {
       socket: socket,
@@ -271,6 +272,38 @@ export default {
       /* cap off font size growth */
       font-size: 2rem;
     }
+  }
+
+  .button {
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: content;
+    transition: all 0.2s;
+    border-radius: 1rem;
+    background-color: white;
+    box-shadow: 0.25rem 0.25rem rgba(0,0,0,0.5);
+    /* height: 8vh; */
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    padding: 0.5rem;
+    transform: scale(1);
+  }
+
+  .button:active {
+    box-shadow: 0rem 0rem rgba(0,0,0,0.5);
+    transform: scale(0.87);
+    background-color: #AACCFF;
+  }
+  
+  .button.disabled {
+    box-shadow: 0rem 0rem rgba(0,0,0,0.5);
+    transform: scale(0.87);
+    background-color: black;
+    opacity: 0.7;
+    color: darkgray;
   }
 
 </style>

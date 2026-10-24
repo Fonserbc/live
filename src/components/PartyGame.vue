@@ -18,10 +18,10 @@
       </div>
       <div class="mod-panel__controls">
 
-        <button v-if="!isLocked && canGameBeLocked" @click="sendLock()" class="btn btn--mod">🔒 Lock</button>
-        <button v-if="isLocked && canGameBeLocked" @click="sendUnlock()" class="btn btn--mod">🔓 Unlock</button>
+        <button v-if="!isLocked && canGameBeLocked" @click="sendLock()" class="btn btn--mod">🔓 Unlocked</button>
+        <button v-if="isLocked && canGameBeLocked" @click="sendUnlock()" class="btn btn--mod">🔒 Locked</button>
         
-        <button v-if="game === 'ChoicesPath'" @click="togglePathState()" class="btn btn--mod">{{ pathState == 'half'? 'Open' : 'Close' }}</button>
+        <button v-if="game === 'ChoicesPath'" @click="togglePathState()" class="btn btn--mod">{{ pathState == 'half'? 'Showing Half' : 'Showing Full' }}</button>
 
         <!-- Raven buttons -->
         <button v-if="ravenState === 'voting' && game === 'Raven'" @click="confirmAction(endRound, 'end voting round?')" class="btn btn--mod">End Round</button>

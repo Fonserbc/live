@@ -6,9 +6,9 @@
         <h1 id="title">
           Path
         </h1>
-        <p v-for="(line, index) in pathWords" :key="index" class="line">
+        <p v-for="(line, index) in pathWords" :key="index" :class="['line', `line-${index}`]">
           <span>{{ line[0].substring(0, line[0].indexOf("$")) }}</span>
-          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="(isLocked || pathState === 'half') && !isMod" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
+          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :pathOpen="pathState != 'half'":choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
           <!-- {{ line[1][pathFirstChoice[index]]}} -->
           <span>{{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) + " "}}</span>
           <!-- {{ line[2][pathSecondChoice[index]] }} -->
@@ -142,7 +142,10 @@ export default {
   .line {
     display: flex;
     flex-direction: line;
-    margin-bottom: 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .line-8 {
+    margin-top:4rem;
   }
 
   #poemcontainer {

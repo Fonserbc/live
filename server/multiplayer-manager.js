@@ -133,6 +133,7 @@ module.exports = function(socketInstance) {
         state.choices.ChoicesPath.choices[i * 2] = 0;
         state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
       }
+      state.pathState = 'half';
 
       displayState.playerNumbers = new Array();
       displayState.selectedNumber = -1;
@@ -341,6 +342,16 @@ module.exports = function(socketInstance) {
 
     socket.on('toggle path state', function() {
       state.pathState = state.pathState != 'half'? 'half' : 'full';
+
+      if (state.pathState == 'full')
+      {
+        for (let i = 0; i < state.choices["ChoicesPath"].choices.length; ++i)
+        {
+          if (i%2==0) {
+            state.choices["ChoicesPath"].choices[i] = -1;
+          }
+        }
+      }
 
       io.emit('new state', state)
     });

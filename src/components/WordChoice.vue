@@ -9,10 +9,10 @@
 
     -->
     <span :class="classObject">
-      <button v-if="!isLocked && !isBeingEdited" @click="openWordList" :class="{ 'word-present': choiceId >= 0, 'first-word': id % 2 == 0}">
+      <button v-if="!lockedWord && !isBeingEdited" @click="openWordList" :class="{ 'choice-button': true, 'word-present': choiceId >= 0, 'first-word': id % 2 == 0}">
         {{ word || underscores }}
       </button>
-      <button @click="closeWordList" :class="{ 'word-present': choiceId >= 0}" v-else>
+      <button @click="closeWordList" :class="{ 'choice-button': true, 'word-present': choiceId >= 0, 'first-word': id % 2 == 0}" v-else>
         {{ word || underscores }}
       </button>
     </span>
@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  props: ['id', 'anchor', 'choices', 'openedBy', 'syncChoices', 'socket', 'isLocked', 'initialChoiceId'],
+  props: ['id', 'anchor', 'choices', 'openedBy', 'syncChoices', 'socket', 'isLocked', 'initialChoiceId', 'pathOpen'],
   setup(props) {
   },
   computed: {
@@ -41,15 +41,16 @@ export default {
         'word-selector--is-being-edited': this.isBeingEdited,
         'word-selector--is-being-edited-by-me': this.isBeingEditedByMe,
         'locked': this.isLocked,
+        'path-closed': !this.pathOpen,
       }
     },
     "underscores": function() {
       return "＿".repeat(parseInt(4, 10))
     },
-    "openedBySocketId": function() {
+    openedBySocketId () {
       return this.openedBy[this.id]
     },
-    isBeingEditedByMe: function() {
+    isBeingEditedByMe() {
       return this.openedBySocketId === this.socket.id && typeof this.socket.id !== 'undefined'
     },
     isBeingEdited: function() {
@@ -58,6 +59,9 @@ export default {
     word() {
       return this.choiceId < 0? "" : this.choices[this.choiceId]
     },
+    lockedWord() {
+      return this.isLocked && this.choiceId >= 0;
+    }
   },
   methods: {
     editBlank() {
@@ -65,17 +69,27 @@ export default {
     openWordList() {
       this.isWordListOpen = true
       this.socket.emit('open word choice', this.id)
-      this.$emit('open', this.id)
+
+      
+      let id = this.id;
+      this.editTimeout = setTimeout(() => this.checkAutoCloseWordList(id), 10000);
+    },
+    checkAutoCloseWordList(id) {
+      console.log("checkAutoClose", id, this);
+      if (this.isBeingEditedByMe) {
+        this.closeWordList();
+      }
     },
     closeWordList() {
       this.isWordListOpen = false
       this.socket.emit('close word choice', this.id)
-      this.$emit('close')
+      clearTimeout(this.editTimeout);
     },
     submitWord(index) {
       //const to = e.target.innerHTML
       const to = index;
       const from = this.choiceId;
+      clearTimeout(this.editTimeout);
 
       this.socket.emit('submit choice', to, from, this.id, (err) => {
         if (err) {
@@ -92,6 +106,7 @@ export default {
       isWordListOpen: false,
       lengthClass: `word-group`,//word-group--length-4${this.length}`,
       wordListClass: 'word-list',
+      editTimeout: null,
     }
   },
 }
@@ -112,17 +127,27 @@ export default {
     opacity: 1;
     line-height: 1;
   }
-
-  .word-present {
+  .choice-button {
+    text-decoration: underline;
     color: #45818E;
   }
 
-  .word-present.first-word {
+  .choice-button.first-word {
     color: #e05f0e;
   }
-
-  .locked > .word-present {
+  .path-closed>.choice-button.first-word {
     color: unset;
+    text-decoration: none;
+  }
+
+  /* .word-present {
+  }
+
+  .word-present.first-word {
+  } */
+
+  .locked>.choice-button.word-present {
+    text-decoration: none;
   }
 
   @keyframes blink {

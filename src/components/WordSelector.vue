@@ -70,7 +70,6 @@ export default {
       this.$emit('wordSelectorOpen', this.i)
 
       let i = this.i;
-
       this.editTimeout = setTimeout(() => this.checkAutoCloseWordList(i), 10000);
     },
     closeWordList() {
@@ -80,7 +79,6 @@ export default {
       clearTimeout(this.editTimeout);
     },
     checkAutoCloseWordList(i) {
-      console.log("checkAutoClose", i, this);
       if (this.blankList[i] == this.socket.id && this.isWordListOpen) {
         this.closeWordList();
       }

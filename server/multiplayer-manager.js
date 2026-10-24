@@ -242,7 +242,7 @@ module.exports = function(socketInstance) {
     })
 
     socket.on('submit word', function (to,from,indexOfBlank, callback) {
-      console.log('WORD  ', socket.id, ': ', indexOfBlank, to, from)
+      //console.log('WORD  ', socket.id, ': ', indexOfBlank, to, from)
 
       const word = to
 
@@ -256,6 +256,13 @@ module.exports = function(socketInstance) {
       // make sure word isn't already used
       if (state.blankList.indexOf(word) > -1) {
         const err = { err: 'word already in use' }
+        console.error(err)
+        return callback(err)
+      }
+
+      if (state.blankList[indexOfBlank] != socket.id)
+      {
+        const err = { err: 'socket does has not locked index' }
         console.error(err)
         return callback(err)
       }
@@ -274,6 +281,12 @@ module.exports = function(socketInstance) {
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
       return callback()
+    })
+
+    socket.on('submit words mod', function(words) {
+      state.blankList = words;
+      socket.emit('new state', state);
+      socket.broadcast.emit('new state', state);
     })
 
     socket.on('submit choice', function (to, from, index, callback) {

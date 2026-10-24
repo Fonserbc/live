@@ -1,5 +1,6 @@
 <template>
   <div id="poemcontainer">
+    <button v-if="isMod" @click="randomizeSong()" class="btn btn--mod">🎲 Randomize Words</button>
 
     <div :class="{columncontainer: isScreen}">
       <div :class="{ poemcolumn: isScreen, column1: isScreen }">
@@ -43,6 +44,8 @@ import QRCode from 'qrcode'
 import socket from '@/socket.js'
 import wordList from '@/fei-words.js'
 import WordSelector from '@/components/WordSelector.vue'
+
+const wordListLength = [1,2,2,2,2,2,2,1,2,1,2,1,2,2,2,1,2,1,2,2,2,4,2,4,1];
 
 
 export default {
@@ -93,6 +96,35 @@ export default {
     },
     sendReset() {
       this.socket.emit('send reset')
+    },
+    randomizeSong() {
+
+      var randomList = new Array(this.blankList.length);
+
+      var lengthToWords = new Map();
+      lengthToWords.set(1, []);
+      lengthToWords.set(2, []);
+      lengthToWords.set(4, []);
+      for (let i = 0; i < wordList.length; ++i)
+      {
+        let w = wordList[i];
+        let l = w.length;
+        lengthToWords.get(l).push(w);
+      }
+
+      for (let i = 0; i < wordListLength.length; ++i)
+      {
+        let l = wordListLength[i];
+
+        let unusedWords = lengthToWords.get(l);
+        let r = Math.floor(Math.random()*unusedWords.length);
+        let w = unusedWords.splice(r, 1);
+        lengthToWords.set(l, unusedWords);
+
+        randomList[i] = w[0];
+      }
+
+      this.socket.emit('submit words mod', randomList);
     },
     sendLock() {
       this.socket.emit('lock state')

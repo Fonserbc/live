@@ -30,8 +30,8 @@
     <div align='left' v-if="!canInputWords && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
       {{loveLetters[loveLetterId%loveLetters.length]}}
     </div>
-    <div id="open-letter-button" v-if="!canInputWords && loveLetters.length > 0" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !isMod}" @click="showNextLetter()">
-      Open letter
+    <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !isMod}" @click="showNextLetter()">
+      {{unseenLetterCount == 0? "No new letters" : "Open new received"}}
       <div v-if="unseenLetterCount > 0" id="letters-count"><div>{{ unseenLetterCount }}</div></div>
     </div>
     <div v-if="canInputWords && !areWordsSent && languageChosen" id="input-container">
@@ -226,6 +226,8 @@ export default {
   }
   h1 {
     text-align: center;
+    font-family: cursive;
+    font-style: italic;
   }
   #input-container {
     width: 100%;
@@ -339,8 +341,9 @@ export default {
     flex-wrap: wrap;
     justify-content: left;
     align-items: left;
-    white-space: pre;
     margin-bottom: 2rem;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
   .sent-word {
     font-size: 2rem;

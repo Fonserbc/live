@@ -24,6 +24,8 @@ export default {
       isWordListOpen: false,
       lengthClass: `word-group word-group--length-${this.length}`,
       wordListClass: 'word-list',
+      isMod: this.$route.query.role === 'mod',
+      editTimeout: null,
     }
   },
   computed: {
@@ -44,19 +46,44 @@ export default {
       // the chosen word otherwise
       return (this.blankValue && !this.isBeingEdited) ? this.blankValue : ''
     },
+    wordsOfLengthAvailable() {
+      let l =  parseInt(this.length, 10);
+
+      let words = this.wordList.filter(w => w.length === l);
+      let anyWordFree = false;
+      for (let i = 0; i < words.length; ++i) {
+        if (!this.isWordUsed(words[i]))
+          anyWordFree = true;
+      }
+
+      return anyWordFree;
+    }
   },
   methods: {
     editBlank() {
     },
     openWordList() {
+      if (!this.isMod && !this.wordsOfLengthAvailable)
+        return;
       this.isWordListOpen = true
       this.socket.emit('open word selector', this.i)
       this.$emit('wordSelectorOpen', this.i)
+
+      let i = this.i;
+
+      this.editTimeout = setTimeout(() => this.checkAutoCloseWordList(i), 10000);
     },
     closeWordList() {
       this.isWordListOpen = false
       this.socket.emit('close word selector', this.i)
       this.$emit('wordSelectorClose')
+      clearTimeout(this.editTimeout);
+    },
+    checkAutoCloseWordList(i) {
+      console.log("checkAutoClose", i, this);
+      if (this.blankList[i] == this.socket.id && this.isWordListOpen) {
+        this.closeWordList();
+      }
     },
     isWordUsed(word) {
       return this.blankList.indexOf(word) > -1
@@ -64,6 +91,7 @@ export default {
     submitWord(e) {
       const to = e.target.innerHTML
       const from = this.word
+      clearTimeout(this.editTimeout);
 
       this.socket.emit('submit word', to, from, this.i, (err) => {
         if (err) {

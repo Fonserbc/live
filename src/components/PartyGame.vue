@@ -29,6 +29,7 @@
         <button v-if="ravenState === 'end' && game === 'Raven'" @click="confirmAction(sendReset, 'Are you sure you want to reset everything?')" class="btn btn--mod">Back to intro</button>
         <button v-if="ravenState === 'results' && game === 'Raven'" @click="confirmAction(endRaven,'end raven?')" class="btn btn--mod">End song</button>
         <button v-if="game === 'Order'" @click="confirmAction(changeOrderLanguage,'change language?')" class="btn btn--mod">{{ this.orderEnglishWords? "En" : "Zh" }}</button>
+        <button v-if="game === 'Order'" @click="allowNewOrder" class="btn btn--mod">Allow new order</button>
 
         <button v-if="game !== 'Raven'" @click="offerReset()" class="btn btn--mod">🔄 Reset</button>
         <button v-if="game === 'YenTing'" @click="endPartyConfirm()" class="btn btn--mod btn--danger">🛑 End Party: {{ this.$route.params.party }}</button>
@@ -207,6 +208,9 @@ export default {
     },
     changeOrderLanguage() {
       this.socket.emit('change order language');
+    },
+    allowNewOrder() {
+      this.socket.emit('allow new order');
     },
 
     setState(newState) {

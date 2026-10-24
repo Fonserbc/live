@@ -40,7 +40,7 @@
 <script>
 import socket from '@/socket.js'
 
-const wordsEng = ["wiser", "what", "I", "you", "think", "it", "than", "how", "change", "know", "is", "of"];
+const wordsEng = ["wiser", "what", "I", "you", "think", "it", "than", "how", "change", "know", "is", "of", "are"];
 const wordsZh = ["我", "懂", "你", "更", "的", "又", "愛", "了", "白", "想"];
 
 // Only send one sentence per player once
@@ -76,6 +76,7 @@ export default {
     });
     this.socket.on('new display state', this.newDisplayState);
     this.socket.on('reset local', this.resetLocal);
+    this.socket.on('allow new order', this.openForNewOrder);
   },
 
   beforeUnmount() {
@@ -154,6 +155,16 @@ export default {
       {
         this.socket.emit('send order', s);
         this.areWordsSent = true;
+      }
+    },
+    openForNewOrder() {
+      if (this.areWordsSent) {
+        this.init();
+
+        if (navigator.vibrate !== undefined)
+        {
+          navigator.vibrate([100,100,200,100,100]);
+        }
       }
     },
     newDisplayState(newDisplayState)

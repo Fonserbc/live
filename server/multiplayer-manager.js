@@ -36,6 +36,7 @@ let state = {
 let displayState = {
   // Numbers
   playerNumbers: new Array(),
+  selectedNumber: -1,
 
   // Order
   orderedSentences: new Array(),
@@ -134,6 +135,7 @@ module.exports = function(socketInstance) {
       }
 
       displayState.playerNumbers = new Array();
+      displayState.selectedNumber = -1;
       displayState.orderedSentences = new Array();
       displayState.loveLetters = new Array();
       displayState.loveLetterId = -1;
@@ -150,6 +152,11 @@ module.exports = function(socketInstance) {
       
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
+    })
+
+    socket.on('allow new order', () => {
+      socket.emit('allow new order');
+      socket.broadcast.emit('allow new order');
     })
 
     socket.on('end party', (id) => {
@@ -200,6 +207,15 @@ module.exports = function(socketInstance) {
       
       io.to('display channel').emit('new display state', displayState);
     });
+
+    socket.on("select number", (n) => {
+      if (isNaN(displayState.selectedNumber))
+        displayState.selectedNumber = -1;
+      if (!isNaN(n))
+        displayState.selectedNumber = n;
+
+      io.to('display channel').emit('new display state', displayState);
+    })
 
     socket.on('send order', (sentence) => {
       displayState.orderedSentences.push(sentence);

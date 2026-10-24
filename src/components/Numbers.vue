@@ -1,6 +1,13 @@
 <template>
+  <div class="mod-panel" v-if="isMod">
+    <!-- <button v-if="isMod" @click="selectNumber(-1)" class="btn btn--mod prev-button">Prev</button> -->
+    <button v-if="isMod" @click="selectNumber(+1)" class="btn btn--mod next-button">Next</button>
+  </div>
+  <h1 v-if="!canInputNumbers" id="title-screen">
+    Numbers
+  </h1>
   <div id="container">
-    <h1 id="title">
+    <h1 v-if="canInputNumbers" id="title">
       Numbers
     </h1>
     <div v-if="canInputNumbers" id="player-number-container" :class="{'sent-container': numbersLocked}">
@@ -9,14 +16,29 @@
       </div>
     </div>
     
-    <div v-if="!canInputNumbers" id="player-numbers">
-      <div v-for="([numbers, nid], index) in playerNumbers" :key="nid" :class="{'list-numbers-container': true, 'sent-container': index == playerNumbers.length - 1}">
-        <div v-for="number in numbers" :class="['number-'+number, 'player-number', index < playerNumbers.length - 1? 'unsent-number' : null]">
+    <div id="display" v-if="!canInputNumbers">
+      <div id="player-numbers-after">
+        <div v-if="selectedId >= 0" v-for="([numbers, nid], index) in playerNumbers.slice(0,selectedId)" :key="nid" :class="{'list-numbers-container': true}">
+          <div v-for="number in numbers" :class="['number-'+number, 'player-number', 'unsent-number']">
+            {{ number }}
+          </div>
+        </div>
+      </div>
+      <div id="player-number-container" :class="{'sent-container': selectedId >= 0 && selectedId < playerNumbers.length, 'player-number-display': true}">
+        <div v-if="selectedId >= 0 && selectedId < playerNumbers.length" v-for="number in playerNumbers[selectedId][0]" :class="['number-'+number, 'player-number']">
           {{ number }}
         </div>
       </div>
-      
+      <div id="player-numbers-before">
+        <div v-for="([numbers, nid], index) in playerNumbers.slice(selectedId + 1)" :key="nid" :class="{'list-numbers-container': true}">
+          <div v-for="number in numbers" :class="['number-'+number, 'player-number',  'unsent-number']">
+            {{ number }}
+          </div>
+        </div>
+      </div>
+      <div id="gradient-after"></div>
     </div>
+    
   </div>
   <div v-if="canInputNumbers" id="input-container">
     <div id="input-main">
@@ -77,6 +99,8 @@ export default {
       this.setState(state);
     });
     this.socket.on('new display state', this.newDisplayState);
+    if (!this.canInputNumbers)
+      this.numbersLocked = true;
   },
 
   beforeUnmount() {
@@ -140,12 +164,28 @@ export default {
     newDisplayState(newDisplayState)
     {
       this.playerNumbers = newDisplayState.playerNumbers;
+      this.selectedId = newDisplayState.selectedNumber;
+    },
+    selectNumber(delta)
+    {
+      this.selectedId = (this.selectedId + delta) % this.playerNumbers.length;
+      if (this.selectedId < 0) this.selectedId += this.playerNumbers.length - 1;
+
+      this.socket.emit("select number", this.selectedId);
     }
   },
 }
 </script>
 
 <style scoped>
+#title-screen {
+  z-index: 1;
+  position:relative;
+  top:0;
+  font-size: 2.5rem;
+      line-height: 1.3;
+          font-family: 'Noto Sans TC', sans-serif;
+}
   #container {
     min-width: 10em;
     font-family: 'Noto Sans TC', sans-serif;
@@ -154,6 +194,14 @@ export default {
 
     font-size: 1.2rem;
     padding: 0.5em 0.5em 1em;
+  }
+  #display {
+    align-items: center;
+    width: 100vw;
+    position: absolute;
+    left: 0;
+    display: flex;
+    justify-content: center;
   }
   #player-number-container {
     width: 100%;
@@ -171,11 +219,36 @@ export default {
     transition: all 0.3s;
     height: 3.65rem;
   }
-  #player-numbers {
+  #player-number-container.player-number-display {
+    position: fixed;
+    width: min-content;
+    bottom: calc(50vh - 4rem - 4rem);
+  }
+  #gradient-after {
+    position: fixed;
+    bottom: calc(50vh);
+    height: 50vh;
+    width: 100vh;
+    background: #F3F3F3;
+    background: linear-gradient(0deg,rgba(243, 243, 243, 0) 0%, rgba(243, 243, 243, 1) 100%);
+  }
+  #player-numbers-after {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
+    align-items: end;
+    justify-content: center;
+    position: fixed;
+    bottom: calc(50vh);
+    margin: auto;
+  }
+  #player-numbers-before {
+    display: flex;
+    flex-direction: column;
     align-items: start;
     justify-content: center;
+    position: fixed;
+    top: calc(50vh + 4rem + 4rem);
+    margin: auto;
   }
   .list-numbers-container {
     width: 100%;
@@ -191,8 +264,31 @@ export default {
     padding-left: 1em;
     padding-right: 1em;
     height: 3.65rem;
-    transition: unset;
+    margin-top: 0;
   }
+  #player-numbers-before>.list-numbers-container:first-child {
+    animation: before-become-first 0.69s forwards;
+  }
+  @keyframes before-become-first {
+    from {
+      margin-top: 3.65rem;
+    }
+    to {
+      margin-top: 0;
+    }
+  }
+  #player-numbers-after>.list-numbers-container:last-child {
+    animation: after-become-first 0.69s forwards;
+  }
+  @keyframes after-become-first {
+    from {
+      margin-bottom: -3.65rem;
+    }
+    to {
+      margin-bottom: 0;
+    }
+  }
+
   .player-number {
     display: flex;
     font-size: 2rem;
@@ -312,6 +408,31 @@ export default {
     height: 7rem;
     padding-bottom: 2.75rem;
     background-color: lightgreen;
+  }
+
+  .mod-panel {
+    display: flex;
+    justify-content: flex-end;
+    background: #002fff;
+    background: linear-gradient(0deg,rgba(0, 47, 255, 0) 0%, rgba(83, 211, 237, 1) 100%);
+    color: black;
+    height: 4rem;
+    padding: 0.5rem;
+  }
+
+  .mod-panel .btn {
+    font-size: 1rem;
+  }
+
+  .next-button {
+    position: relative;
+    float: right;
+    align-self: flex-end;
+    right:0;
+  }
+  .prev-button {
+    position: relative;
+    float: left;
   }
   @media (min-width: calc(336px)) {
     #poemcontainer {

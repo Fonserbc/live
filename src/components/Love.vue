@@ -1,6 +1,6 @@
 <template>
   <div id="container">
-    <h1 id="title">
+    <h1 id="title" class="cursive-bold">
       Writting Love
     </h1>
     <!-- <div v-if="canInputWords && languageChosen && !areWordsSent" id="explanation">
@@ -14,7 +14,7 @@
       <div align='left' class="sent-letter-container">
         {{ sentLetter }}
       </div>
-      <div v-if="canInputWords" id="sent-info">Sent ✓</div>
+      <div v-if="canInputWords" id="sent-info" class="cursive">Sent ✓</div>
     </div>
 
     <div v-if="canInputWords && !areWordsSent" id="letter-container">
@@ -99,6 +99,10 @@ export default {
     // });
     this.socket.on('new display state', this.newDisplayState);
     this.socket.on('reset local', this.resetLocal);
+    this.socket.on('allow new letter', this.newLetterAllowed);
+    this.socket.emit('join', (state) => {
+      this.setState(state);
+    });
   },
 
   beforeUnmount() {
@@ -207,6 +211,13 @@ export default {
           socket.emit('visualize letter', this.loveLetterId, this.loveLettersSeen);
         }
       }
+    },
+    newLetterAllowed() {
+      this.areWordsSent = false;
+      this.lang = '';
+      this.processedLines = [];
+      this.writtenWords = [];
+      this.sentLetter = "";
     }
   },
 }
@@ -226,8 +237,7 @@ export default {
   }
   h1 {
     text-align: center;
-    font-family: cursive;
-    font-style: italic;
+    font-size: 4rem;
   }
   #input-container {
     width: 100%;

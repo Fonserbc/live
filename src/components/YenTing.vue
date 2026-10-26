@@ -20,16 +20,16 @@ export default {
   mounted() {
     this.canvas = this.$refs.canvas;
 
-    this.ctx = this.canvas.getContext('2d');
-    this.ctx.fillStyle = "#e6e6e6"
-    this.ctx.fillRect(0, 0, this.width, this.height);
-    this.setSize(this.canvas)
+    // this.ctx = this.canvas.getContext('2d');
+    // this.ctx.fillStyle = "#e6e6e6"
+    // this.ctx.fillRect(0, 0, this.width, this.height);
+    // this.setSize(this.canvas)
 
 
-    this.draw()
+    //this.draw()
 
-    window.addEventListener('resize', this.setSize)
-    window.requestAnimationFrame(this.draw)
+    // window.addEventListener('resize', this.setSize)
+    // window.requestAnimationFrame(this.draw)
   },
   methods: {
     draw() {

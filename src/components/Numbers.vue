@@ -95,12 +95,13 @@ export default {
 
     this.socket.on('connect', this.connect);
     this.socket.on('new state', this.setState);
-    this.socket.emit('join', (state) => {
-      this.setState(state);
-    });
     this.socket.on('new display state', this.newDisplayState);
     if (!this.canInputNumbers)
       this.numbersLocked = true;
+    
+    this.socket.emit('join', (state) => {
+      this.setState(state);
+    });
   },
 
   beforeUnmount() {

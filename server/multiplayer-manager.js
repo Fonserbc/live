@@ -160,11 +160,9 @@ module.exports = function(socketInstance) {
       socket.broadcast.emit('allow new order');
     })
 
-    socket.on('end party', (id) => {
-      console.log('END   ', id)
-      partyManager.endParty(id)
-      socket.emit('end party', state)
-      socket.broadcast.emit('end party', state)
+    socket.on('allow new letter', () => {
+      socket.emit('allow new letter');
+      socket.broadcast.emit('allow new letter');
     })
 
     socket.on('open word selector', (i) => {

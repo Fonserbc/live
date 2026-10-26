@@ -5,7 +5,7 @@
 
       <div class="controls">
         <select @change="changeGame" v-model="game">
-          <option disabled value="">Please select one</option>
+          <option disabled value="">Select..</option>
           <option>YenTing</option>
           <option>FillingIn</option>
           <option>ChoicesPath</option>
@@ -16,7 +16,7 @@
           <option>Love</option>
         </select>
       </div>
-      <div class="mod-panel__controls">
+      <!-- <div class="mod-panel__controls"> -->
 
         <button v-if="!isLocked && canGameBeLocked" @click="sendLock()" class="btn btn--mod">🔓 Unlocked</button>
         <button v-if="isLocked && canGameBeLocked" @click="sendUnlock()" class="btn btn--mod">🔒 Locked</button>
@@ -29,16 +29,16 @@
         <button v-if="ravenState === 'end' && game === 'Raven'" @click="confirmAction(sendReset, 'Are you sure you want to reset everything?')" class="btn btn--mod">Back to intro</button>
         <button v-if="ravenState === 'results' && game === 'Raven'" @click="confirmAction(endRaven,'end raven?')" class="btn btn--mod">End song</button>
         <button v-if="game === 'Order'" @click="confirmAction(changeOrderLanguage,'change language?')" class="btn btn--mod">{{ this.orderEnglishWords? "En" : "Zh" }}</button>
-        <button v-if="game === 'Order'" @click="allowNewOrder" class="btn btn--mod">Allow new order</button>
+        <button v-if="game === 'Order'" @click="allowNewOrder()" class="btn btn--mod">Allow new order</button>
+        <button v-if="game === 'Love'" @click="allowNewLetter()" class="btn btn--mod">Allow new letter</button>
 
         <button v-if="game !== 'Raven'" @click="offerReset()" class="btn btn--mod">🔄 Reset</button>
-        <button v-if="game === 'YenTing'" @click="endPartyConfirm()" class="btn btn--mod btn--danger">🛑 End Party: {{ this.$route.params.party }}</button>
-      </div>
+      <!-- </div> -->
     </div>
 
     <canvas v-if="game !== 'YenTing' && isScreen" ref="canvas" class="qrcode" :class="{ qrcodescreen: isScreen }"></canvas>
 
-    <component :is="game" />
+    <component v-if="game !== undefined && game != ''" :is="game" />
 
     <canvas v-if="game === 'YenTing'" ref="canvasBig" id="qrcode-big"></canvas>
     <!-- <p v-if="game === 'YenTing'" style="text-align:center;">Let your neighbour scan and join!</p> -->
@@ -212,6 +212,9 @@ export default {
     allowNewOrder() {
       this.socket.emit('allow new order');
     },
+    allowNewLetter() {
+      this.socket.emit('allow new letter');
+    },
 
     setState(newState) {
       this.blankList = newState.blankList
@@ -308,6 +311,10 @@ export default {
     background-color: black;
     opacity: 0.7;
     color: darkgray;
+  }
+
+  .mod-panel {
+    display:flex;
   }
 
 </style>

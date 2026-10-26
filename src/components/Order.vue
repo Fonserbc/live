@@ -71,12 +71,12 @@ export default {
 
     // this.socket.on('connect', this.connect);
     this.socket.on('new state', this.setState);
-    this.socket.emit('join', (state) => {
-      this.setState(state);
-    });
     this.socket.on('new display state', this.newDisplayState);
     this.socket.on('reset local', this.resetLocal);
     this.socket.on('allow new order', this.openForNewOrder);
+    this.socket.emit('join', (state) => {
+      this.setState(state);
+    });
   },
 
   beforeUnmount() {

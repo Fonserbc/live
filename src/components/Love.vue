@@ -26,12 +26,16 @@
         <p v-if="index==0 || index == processedLines.length-2"><br></p>
       </p>
     </div>
+
+    <div id="description-noletters" v-if="!canInputWords && loveLetters.length == 0" >
+      Waiting for your love letters...
+    </div>
     
     <div align='left' v-if="!canInputWords && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
       {{loveLetters[loveLetterId%loveLetters.length]}}
     </div>
     <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !isMod}" @click="showNextLetter()">
-      {{unseenLetterCount == 0? "No new letters" : "Open new received"}}
+      {{unseenLetterCount == 0? "No new letters" : "Open new received letter"}}
       <div v-if="unseenLetterCount > 0" id="letters-count"><div>{{ unseenLetterCount }}</div></div>
     </div>
     <div v-if="canInputWords && !areWordsSent && languageChosen" id="input-container">
@@ -390,12 +394,6 @@ export default {
     #poemcontainer {
       /* cap off font size growth */
       font-size: 2rem;
-    }
-  }
-  /* This styling only happens if we are a role=screen, and actually I've been only testing it against a 1280p screen */
-  @media (max-height: calc(1000px)) and (min-width: calc(1100px)) {
-    #title {
-      text-align: left;
     }
   }
 

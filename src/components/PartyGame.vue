@@ -110,7 +110,6 @@ export default {
     this.socket.on('connect', this.connect)
     this.socket.on('new state', this.setState)
     this.socket.on('new display state', this.setDisplayState)
-    this.socket.on('end party', this.receivePartyEnd)
     if (this.$route.query.role !== undefined)
       this.socket.emit('report role', this.$route.query.role);
     this.socket.emit('join');
@@ -119,7 +118,6 @@ export default {
   beforeUnmount() {
     this.socket.off('connect', this.connect)
     this.socket.off('new state', this.setState)
-    this.socket.off('end party', this.receivePartyEnd)
   },
 
   methods: {
@@ -172,20 +170,6 @@ export default {
     },
     wordSelectorClose() {
       this.openWordSelectorIndex = -1
-    },
-
-    receivePartyEnd() {
-      this.$router.push({ path: '/', query: this.$route.query })
-    },
-
-    endParty() {
-      this.socket.emit('end party', this.$route.params.party )
-    },
-
-    endPartyConfirm() {
-      if (confirm('Are you sure you want to end the party?')) {
-        this.endParty()
-      }
     },
     confirmAction(cb, text) {
       if (confirm(text)) {

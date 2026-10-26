@@ -1,4 +1,3 @@
-const partyManager = require('./party-manager')
 let wordList = require('./fei-words.js')
 let pathWords = require('./path-words.js')
 
@@ -52,16 +51,57 @@ for (let i = 0; i < pathWords.length; ++i) {
   state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
 }
 
-function deepCopy(data) {
-  return JSON.parse(JSON.stringify(data))
+function resetState() {
+  console.log('RESET');
+
+  state.blankList = new Array(wordList.length)
+  state.isLocked = false
+
+  state.ravenState = 'intro'
+  state.votes = {
+    Piano: 0,
+    Guitar: 0,
+    Bass: 0,
+    Drums: 0,
+  }
+
+  state.choices.ChoicesPath.choices = new Array(pathWords.length * 2);
+  state.choices.ChoicesPath.openedBy = new Array(pathWords.length * 2);
+  for (let i = 0; i < pathWords.length; ++i) {
+    state.choices.ChoicesPath.choices[i * 2] = 0;
+    state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
+  }
+  state.pathState = 'half';
+
+  // Display
+  displayState.playerNumbers = new Array();
+  displayState.selectedNumber = -1;
+
+  displayState.orderedSentences = new Array();
+
+  displayState.loveLetters = new Array();
+  displayState.loveLetterId = -1;
+  displayState.loveLettersSeen = 0;
 }
 
-const originalWordList = deepCopy(wordList)
 
 let io = null;
 
 module.exports = function(socketInstance) {
   io = socketInstance
+
+  async function resetIfNoConnections() {
+    const sockets = await io.fetchSockets();
+
+    if (sockets.length == 0) {
+      console.log("no sockets alive, resetting and sleeping...");
+      resetState();
+
+      // hard reset stuff
+      state.game = 'YenTing';
+      state.orderEnglishWords = true;
+    }
+  }
 
   socketInstance.on('connection', (socket) => {
     console.log('HELLO ', socket.id)
@@ -114,33 +154,7 @@ module.exports = function(socketInstance) {
     })
 
     socket.on('send reset', () => {
-      console.log('RESET ')
-
-      state.blankList = new Array(wordList.length)
-      state.isLocked = false
-
-      state.ravenState = 'intro'
-      state.votes = {
-        Piano: 0,
-        Guitar: 0,
-        Bass: 0,
-        Drums: 0,
-      }
-
-      state.choices.ChoicesPath.choices = new Array(pathWords.length * 2);
-      state.choices.ChoicesPath.openedBy = new Array(pathWords.length * 2);
-      for (let i = 0; i < pathWords.length; ++i) {
-        state.choices.ChoicesPath.choices[i * 2] = 0;
-        state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
-      }
-      state.pathState = 'half';
-
-      displayState.playerNumbers = new Array();
-      displayState.selectedNumber = -1;
-      displayState.orderedSentences = new Array();
-      displayState.loveLetters = new Array();
-      displayState.loveLetterId = -1;
-      displayState.loveLettersSeen = 0;
+      resetState();
 
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
@@ -363,6 +377,8 @@ module.exports = function(socketInstance) {
       closeWordSelector()
       closeWordChoice();
       console.log('BYE!  ', socket.id)
+      
+      resetIfNoConnections();
     })
   })
 }

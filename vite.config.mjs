@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
-// The backend (Express + Socket.IO + party API) runs as its own process
+// The backend (Express + Socket.IO) runs as its own process
 // (see server/index.js) and listens on PORT. In dev, Vite serves the
 // frontend on CLIENT_PORT and proxies API/socket/upload traffic to the
 // backend, so the app still looks like a single origin to the browser.

@@ -1,79 +1,81 @@
 <template>
   <div>
-    <img v-if="ravenState !== 'voting'" src="/raven_transparent.gif" width="128" height="128" class="raven" />
-    <div v-if="ravenState=='intro' || ravenState=='end'">
-      <h1><span style="font-family: 'Noto Sans TC', sans-serif;">烏鴉</span> Raven</h1>
-      <div v-if="ravenState=='intro'">
-        <p style="text-align:center;">wait for it...</p>
-      </div>
+    <div class="mod-panel" v-if="isMod">
+      <button v-if="isMod" @click="startVoting()" class="btn btn--mod">{{selectedVoting == ''? 'Select voting first..' : `Start ${selectedVoting} vote`}}</button>
+      <select v-model="selectedVoting">
+          <option disabled value="">Select..</option>
+          <option>leader</option>
+          <option>length</option>
+          <option>loudness</option>
+          <option>pitch</option>
+          <option>mood</option>
+          <option disabled value="">Multiple</option>
+          <option>loudness & pitch</option>
+        </select>
+        <button v-if="votingState === 'voting'" @click="confirmAction(endVoting, 'end voting round?')" class="btn btn--mod">End Vote</button>
     </div>
-    <div v-if="!isScreen">
-      <div v-if="ravenState=='results'" class="results">
-        The two chosen:
-        <div>
-          <div class="result" v-for="i in orderedVotes.slice(0,2)">
-            <strong>{{displayText[i[0]]}}</strong>
+    <div id="content">
+    <h1 id="title">
+      Voting
+    </h1>
+    
+    <div v-if="votingState=='results'" class="results">
+      Results:
+      <div>
+        <div class="result" v-for="i in orderedVotes[0].slice(0,1)">
+          <strong>{{displays[0][i]}} </strong>
 
-            <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
-            </svg> &times; {{i[1]}}
-          </div>
+          <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
+          </svg> &times; {{this.votes[0][i]}}
+        </div>
+        <div class="result-rest" v-for="i in orderedVotes[0].slice(1)">
+          {{displays[0][i]}}
+          <svg width="23" height="23" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
+          </svg> &times; {{this.votes[0][i]}}
         </div>
       </div>
-      <div v-if="ravenState=='voting'">
+    </div>
 
-        <button v-for="numVotes, instrument in votes" @click="triggerVote(instrument)" class="vote-btn">
+    <div v-if="!isScreen">
+      <div v-if="votingState=='voting'">
+        <button v-for="(numVotes, index) in votes[0]" @click="triggerVote(0, index)" class="vote-btn">
           <span class="results-bg"></span>
-          <span class="results-bar" :style="{ width: `${ numVotes / Math.max(totalVotes, 1) * 100 }%` }"></span>
-          {{displayText[instrument]}}
+          <span class="results-bar" :style="{ width: `${ numVotes / Math.max(totalVotes[0], 1) * 100 }%` }"></span>
+          {{displays[0][index]}}
 
 
           <span class="vote-count">{{numVotes}}</span>
-          <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="31" height="28" viewBox="0 0 31 28" fill="gray" xmlns="http://www.w3.org/2000/svg">
             <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
           </svg>
-
         </button>
       </div>
     </div>
     <div v-if="isScreen" class="screen">
-      <div v-if="ravenState=='results'" class="results">
-        The two chosen:
-        <div>
-          <div class="result" v-for="i in orderedVotes.slice(0,2)">
-            <strong>{{displayText[i[0]]}} </strong>
-
-            <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
-            </svg> &times; {{i[1]}}
-          </div>
-        </div>
-      </div>
-
-      <div v-if="ravenState=='voting'">
-
+      <div v-if="votingState=='voting'">
         <TransitionGroup name="list" tag="ul">
-          <li v-for="item in orderedVotes" :key="item[0]" class="vote-btn">
+          <li v-for="item in orderedVotes[0]" :key="item" class="vote-btn">
             <span class="results-bg"></span>
-            <span class="results-bar" :style="{ width: `${ item[1] / Math.max(totalVotes, 1) * 100 }%` }"></span>
-            {{displayText[item[0]]}}
+            <span class="results-bar" :style="{ width: `${ votes[0][item] / Math.max(totalVotes[0], 1) * 100 }%` }"></span>
+            {{displays[0][item]}}
 
-            <span class="vote-count">{{item[1]}}</span>
+            <span class="vote-count">{{votes[0][item]}}</span>
             <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
             </svg>
 
           </li>
         </TransitionGroup>
-
       </div>
+    </div>
     </div>
   </div>
 </template>
 
 <script>
 import socket from '@/socket.js'
-import wordList from '@/fei-words.js'
 
 
 export default {
@@ -82,90 +84,55 @@ export default {
       socket: socket,
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
-      wordList,
-      blankList: new Array(wordList.length),
       isLocked: false,
       url: '',
 
-      ravenState: 'intro',
-      votes: {
-        Piano: 0,
-        Guitar: 0,
-        /*Bass: 0,*/
-        Drums: 0
-      },
+      votingState: 'intro',
+      votes: [],
+      displays: [],
+      selectedVoting: '',
 
-      displayText: {
-        Piano: "Piano 🎹",
-        Guitar: "Guitar 🎸",
-        Bass: "Bass 🎻",
-        Drums: "Drums 🥁"
-      }
-      // Only one WordSelector is allowed open at a time.
-      // This represents the index of the one that's open.
-      //openWordSelectorIndex: -1,
+      // displayText: {
+      //   Piano: "Piano 🎹",
+      //   Guitar: "Guitar 🎸",
+      //   Bass: "Bass 🎻",
+      //   Drums: "Drums 🥁"
+      // }
     }
   },
 
   computed: {
     totalVotes() {
-      let num = 0
-
-      Object.values(this.votes).forEach(n => {
-        num += n
-      })
-
-      return num
+      let tv = new Array();
+      for (let i = 0; i < this.votes.length; ++i)
+      {
+        let num = 0;
+        for (let j = 0; j < this.votes[i].length; ++j)
+          num += this.votes[i][j];
+        tv.push(num);
+      }
+      return tv;
     },
     orderedVotes() {
-      const votesArray = Object.entries(this.votes)
-      let ordered = votesArray.sort((a, b) => { return b[1] - a[1] })
-
-      if (this.isScreen && this.ravenState == 'voting')
-        return ordered;
-
-      // make sure that if any top 2 are tied, to randomize it a bit each time to prevent cases like:
-      // if "Piano" is tied with anybody, it will always win, because its earlier appearance on the votes array
-      // But also everyone should compute the same "random" :S
-
-      // In this case, I'm using the total number of votes as a syncronized "random" number seed
-      // We could change this for a real sync random
-      let totalVotes = 0
-      Object.values(this.votes).forEach(n => {
-        totalVotes += n
-      })
-
-      // Check for ties
-      const topCount = 2
-      for (let i = 0; i < topCount;) {
-        let sameVotes = 1
-        for (let j = i + 1; j < ordered.length && ordered[i][1] == ordered[j][1]; ++j) {
-          sameVotes++
-        }
-
-        if (i + sameVotes > topCount) // "randomize" tied votes
-        {
-          let newOrderValue = {}
-          for (let j = 0; j < sameVotes; ++j) {
-            newOrderValue[ordered[i + j][0]] = (j + totalVotes) * 17 % 5 // randomish order using a * prime % prime
-          }
-          let reorderedSubarray = ordered.splice(i, sameVotes).sort((a, b) => { return newOrderValue[b[0]] - newOrderValue[a[0]] })
-          ordered.splice(i, 0, ...reorderedSubarray)
-        }
-
-        i += sameVotes;
+      let allOrderedVotes = new Array();
+      for (let i = 0; i < this.votes.length; ++i)
+      {
+        let votesArray = new Array();
+        for (let j = 0; j < this.votes[i].length; ++j)
+          votesArray.push(j);
+        
+        let ordered = votesArray.sort((a, b) => { return this.votes[i][b] - this.votes[i][a] })
+        allOrderedVotes.push(ordered);
       }
-      return ordered
+
+      return allOrderedVotes;
     }
   },
 
   mounted() {
 
     this.socket.on('new state', this.setState)
-    this.socket.emit('join', (state) => {
-      this.votes = state.votes
-      this.ravenState = state.ravenState
-    })
+    this.socket.emit('join', this.setState)
   },
 
   beforeUnmount() {
@@ -175,19 +142,58 @@ export default {
     connect() {
       console.log('connected')
     },
-    triggerVote(instrument) {
-      this.socket.emit('send vote', instrument)
+    triggerVote(votingId, chosenId) {
+      this.socket.emit('send vote', votingId, chosenId)
     },
-
     setState(newState) {
       this.votes = newState.votes
-      this.ravenState = newState.ravenState
+      this.displays = newState.votesDisplay
+      this.votingState = newState.votingState
     },
+    startVoting() {
+      if (this.selectedVoting != '')
+      {
+        let wannaVote = [];
+        if (this.selectedVoting == 'loudness & pitch')
+        {
+          wannaVote.push('loudness');
+          wannaVote.push('pitch');
+        }
+        else wannaVote.push(this.selectedVoting);
+        this.socket.emit('start vote', wannaVote);
+      }
+    },
+    endVoting() {
+      this.votingState = 'results';
+      this.socket.emit('end vote');
+    },
+    confirmAction(cb, text) {
+      if (confirm(text)) {
+        cb();
+      }
+    }
   },
 }
 </script>
 
 <style scoped>
+#content {
+  padding-top: 1rem;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+.mod-panel {
+  display: flex;
+  justify-content: flex-end;
+  background: #002fff;
+  background: linear-gradient(0deg,rgba(0, 47, 255, 0) 0%, rgba(83, 211, 237, 1) 100%);
+  color: black;
+  height: 4rem;
+  padding: 0.5rem;
+}
+
 .vote-btn {
   background: white;
   border-radius: 0 0 8px 8px;
@@ -242,8 +248,17 @@ export default {
 .vote-btn:active svg path {
   transition: none;
   fill: red;
- stroke: red;
- transform: scale(3);
+  stroke: red;
+  transform: scale(3);
+}
+
+.result-rest svg path {
+  transition: none;
+  fill: #aaa;
+  stroke: #aaa;
+}
+.result-rest {
+  margin-top: 1rem;
 }
 
 
@@ -269,7 +284,7 @@ export default {
   vertical-align: middle;
   margin-left: 1em;
 }
-.results svg path {
+.result svg path {
   fill: red;
   stroke: red;
 }

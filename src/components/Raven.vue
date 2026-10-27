@@ -163,7 +163,7 @@ export default {
 
     this.socket.on('new state', this.setState)
     this.socket.emit('join', (state) => {
-      this.votes = state.votes
+      this.votes = state.votesRaven
       this.ravenState = state.ravenState
     })
   },
@@ -176,11 +176,11 @@ export default {
       console.log('connected')
     },
     triggerVote(instrument) {
-      this.socket.emit('send vote', instrument)
+      this.socket.emit('send vote raven', instrument)
     },
 
     setState(newState) {
-      this.votes = newState.votes
+      this.votes = newState.votesRaven
       this.ravenState = newState.ravenState
     },
   },

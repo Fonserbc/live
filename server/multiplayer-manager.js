@@ -13,12 +13,16 @@ let state = {
   // Raven
   ravenState: 'intro',
   pathState: 'half',
-  votes: {
+  votesRaven: {
     Piano: 0,
     Guitar: 0,
     /*Bass: 0,*/
     Drums: 0
   },
+  // Voting
+  votes: [],
+  votesDisplay: [],
+  votingState: 'intro',
 
   // Choices
   choices: {
@@ -46,6 +50,30 @@ let displayState = {
   loveLettersSeen: 0,
 }
 
+let votesSets = {
+  'leader': [
+    'YenTing',
+    'HsinWei',
+    'DongDong'
+  ],
+  'length': [
+    'Long',
+    'Short'
+  ],
+  'loudness': [
+    'Loud',
+    'Soft'
+  ],
+  'pitch': [
+    'High',
+    'Low'
+  ],
+  'mood': [
+    'Action',
+    'Zen'
+  ]
+};
+
 for (let i = 0; i < pathWords.length; ++i) {
   state.choices.ChoicesPath.choices[i * 2] = 0;
   state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
@@ -58,12 +86,16 @@ function resetState() {
   state.isLocked = false
 
   state.ravenState = 'intro'
-  state.votes = {
+  state.votesRaven = {
     Piano: 0,
     Guitar: 0,
     Bass: 0,
     Drums: 0,
   }
+
+  state.votes = [];
+  state.votesDisplay = [];
+  state.votingState = 'intro';
 
   state.choices.ChoicesPath.choices = new Array(pathWords.length * 2);
   state.choices.ChoicesPath.openedBy = new Array(pathWords.length * 2);
@@ -340,7 +372,7 @@ module.exports = function(socketInstance) {
     })
 
     socket.on('start round', function () {
-      state.votes = {
+      state.votesRaven = {
         Piano: 0,
         Guitar: 0,
         Bass: 0,
@@ -368,9 +400,47 @@ module.exports = function(socketInstance) {
       io.emit('new state', state)
     });
 
-    socket.on('send vote', function (instrument) {
-      state.votes[instrument] += 1
+    socket.on('send vote raven', function (instrument) {
+      state.votesRaven[instrument] += 1
       io.emit('new state', state)
+    })
+
+    socket.on('start vote', function (voteKinds) {
+
+      let votes = new Array();
+      let displays = new Array();
+
+      for (let i = 0; i < voteKinds.length; ++i)
+      {
+        if (Object.hasOwn(votesSets, voteKinds))
+        {
+          let d = votesSets[voteKinds];
+          let v = new Array();
+          for (let j = 0; j < d.length; ++j)
+            v.push(0);
+          votes.push(v)
+          displays.push(d);
+        }
+      }
+      
+      state.votes = votes;
+      state.votesDisplay = displays;
+      state.votingState = 'voting';
+
+      io.emit('new state', state)
+    })
+
+    socket.on('end vote', function () {
+      state.votingState = 'results'
+      io.emit('new state', state)
+    })
+
+    socket.on('send vote', function (id, chosen) {
+      if (id >= 0 && id < state.votes.length && chosen >= 0 && chosen < state.votes[id].length)
+      {
+        state.votes[id][chosen] += 1
+        io.emit('new state', state)
+      }
     })
 
     socket.on('disconnect', function (fn) {

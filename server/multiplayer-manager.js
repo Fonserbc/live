@@ -351,7 +351,7 @@ module.exports = function(socketInstance) {
     })
 
     socket.on('submit choice', function (to, from, index, callback) {
-      console.log(`CHOICE for ${state.game}, by ${socket.id}, [${index}]:${from} => ${to}`);
+      //console.log(`CHOICE for ${state.game}, by ${socket.id}, [${index}]:${from} => ${to}`);
 
       state.choices[state.game].choices[index] = to;
 
@@ -414,7 +414,7 @@ module.exports = function(socketInstance) {
       {
         if (Object.hasOwn(votesSets, voteKinds[i]))
         {
-          console.log("has", voteKinds[i])
+          // console.log("has", voteKinds[i])
           let d = votesSets[voteKinds[i]];
           let v = new Array();
           for (let j = 0; j < d.length; ++j)
@@ -428,7 +428,7 @@ module.exports = function(socketInstance) {
       state.votesDisplay = displays;
       state.votingState = 'voting';
 
-      console.log(voteKinds, votes);
+      // console.log(voteKinds, votes);
 
       io.emit('new state', state)
     })

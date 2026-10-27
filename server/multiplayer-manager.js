@@ -52,25 +52,25 @@ let displayState = {
 
 let votesSets = {
   'leader': [
-    'YenTing',
-    'HsinWei',
-    'DongDong'
+    'YenTing 妍婷',
+    'HsinWei 忻薇',
+    'DongDong 東東'
   ],
   'length': [
-    'Long',
-    'Short'
+    'Long note 長音',
+    'Short note 短音'
   ],
   'loudness': [
-    'Loud',
-    'Soft'
+    'Strong 強',
+    'Soft 弱'
   ],
   'pitch': [
-    'High',
-    'Low'
+    'High 高',
+    'Low 低'
   ],
   'mood': [
-    'Action',
-    'Zen'
+    'Action 動',
+    'Zen 靜'
   ]
 };
 
@@ -412,9 +412,10 @@ module.exports = function(socketInstance) {
 
       for (let i = 0; i < voteKinds.length; ++i)
       {
-        if (Object.hasOwn(votesSets, voteKinds))
+        if (Object.hasOwn(votesSets, voteKinds[i]))
         {
-          let d = votesSets[voteKinds];
+          console.log("has", voteKinds[i])
+          let d = votesSets[voteKinds[i]];
           let v = new Array();
           for (let j = 0; j < d.length; ++j)
             v.push(0);
@@ -426,6 +427,8 @@ module.exports = function(socketInstance) {
       state.votes = votes;
       state.votesDisplay = displays;
       state.votingState = 'voting';
+
+      console.log(voteKinds, votes);
 
       io.emit('new state', state)
     })

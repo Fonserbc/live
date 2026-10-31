@@ -17,6 +17,7 @@
         </select>
       </div>
       <!-- <div class="mod-panel__controls"> -->
+        <input type="checkbox" v-model="showQRScreen" @change="showQRCheck()">Show QR on Screen</input>
 
         <button v-if="!isLocked && canGameBeLocked" @click="sendLock()" class="btn btn--mod">🔓 Unlocked</button>
         <button v-if="isLocked && canGameBeLocked" @click="sendUnlock()" class="btn btn--mod">🔒 Locked</button>
@@ -36,7 +37,11 @@
       <!-- </div> -->
     </div>
 
-    <canvas v-if="game !== 'YenTing' && isScreen" ref="canvas" class="qrcode" :class="{ qrcodescreen: isScreen }"></canvas>
+    <div v-if="game !== 'YenTing' && isScreen && showQRScreen" id="screen-qr-container">
+      <canvas ref="canvas" class="qrcode qrcodescreen"></canvas>
+      <div>live.yentinglo.net</div>
+    </div>
+    
 
     <component v-if="game !== undefined && game != ''" :is="game" />
 
@@ -75,6 +80,7 @@ export default {
       game: '',
       ravenState: 'intro',
       pathState: 'half',
+      showQRScreen: true,
 
       orderEnglishWords: true,
 
@@ -98,7 +104,7 @@ export default {
 
   computed: {
     canGameBeLocked() {
-      return this.game == 'FillingIn' || this.game == 'ChoicesPath';
+      return this.game == 'FillingIn' || this.game == 'ChoicesPath' || this.game == 'Numbers';
     }
   },
 
@@ -137,6 +143,7 @@ export default {
           if (error) console.error(error)
         })
       }
+      else console.log("no canvas found")
 
       if (this.$refs.canvasBig) {
         QRCode.toCanvas(this.$refs.canvasBig, this.url, {
@@ -149,6 +156,13 @@ export default {
         }, function (error) {
           if (error) console.error(error)
         })
+      }
+    },
+    showQRCheck()
+    {
+      if (this.isMod)
+      {
+        this.socket.emit('show qr screen', this.showQRScreen);
       }
     },
     endRound() {
@@ -207,6 +221,11 @@ export default {
       this.ravenState = newState.ravenState
       this.pathState = newState.pathState;
       this.orderEnglishWords = newState.orderEnglishWords;
+      let qr = this.showQRScreen
+      this.showQRScreen = newState.showQRScreen;
+      if (!qr && newState.showQRScreen) {
+        window.setTimeout(1000, this.drawQRCodes)
+      }
     },
 
     setDisplayState(newDisplayState) {
@@ -245,10 +264,24 @@ export default {
     font-size: 1.2rem;
   }
 
-  .qrcodescreen {
+  #screen-qr-container {
     position: absolute;
     top: 0;
     right: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    padding: 0.5em;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: black;
+    z-index: 2;
+  }
+
+  .qrcodescreen {
     width: 7em !important;
     height: 7em !important;
   }

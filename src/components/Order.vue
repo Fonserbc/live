@@ -51,7 +51,7 @@ export default {
       socket: socket,
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
-      isMusician: this.$route.query.role === 'musician',
+      isMusician: this.$route.query.role === 'musician' || this.$route.query.role === 'yenting',
       url: '',
       unchosenWords: [],
       chosenWords: [],

@@ -84,6 +84,7 @@ export default {
       numbersLocked: false,
       playerNumbers: [],
       selectedId: -1,
+      isLocked: false,
     }
   },
 
@@ -118,7 +119,7 @@ export default {
       return !this.isMod && !this.isScreen && !this.isMusician;
     },
     canSendNumbers() {
-      return this.currentNumbers.length > 1 && !this.numbersLocked;
+      return this.currentNumbers.length > 1 && !this.numbersLocked && !this.isLocked;
     }
   },
 
@@ -135,11 +136,11 @@ export default {
       this.socket.emit('send reset')
     },
     setState(newState) {
-      
+      this.isLocked = newState.isLocked;
     },
     numberPressed(n)
     {
-      if (!this.numbersLocked && this.currentNumbers.length < 10) {
+      if (!this.isLocked && !this.numbersLocked && this.currentNumbers.length < 10) {
         this.currentNumbers.push(n);
       }
     },
@@ -150,6 +151,11 @@ export default {
     },
     sendPressed()
     {
+      if (this.isLocked) {
+        this.currentNumbers = [];
+        return;
+      }
+
       if (this.currentNumbers.length < 2)
         return; // TODO ask for more numbers
       this.socket.emit('send numbers', this.currentNumbers);

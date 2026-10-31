@@ -5,6 +5,8 @@ let state = {
   // Player
 
   game: 'YenTing',
+  showQRScreen: true,
+  welcomeMessage: "",
 
   // FillingIn
   blankList: new Array(wordList.length),
@@ -84,6 +86,8 @@ function resetState() {
 
   state.blankList = new Array(wordList.length)
   state.isLocked = false
+  state.showQRScreen = true
+  state.welcomeMessage = ""
 
   state.ravenState = 'intro'
   state.votesRaven = {
@@ -169,9 +173,6 @@ module.exports = function(socketInstance) {
         gameState.openedBy[index] = null;
         index = gameState.openedBy.indexOf(socket.id);
       }
-
-      socket.emit('new state', state)
-      socket.broadcast.emit('new state', state)
     }
 
     socket.on('join', () => {
@@ -180,9 +181,25 @@ module.exports = function(socketInstance) {
         socket.emit('new display state', displayState)
     })
 
+    socket.on('show qr screen', (show) => {
+      state.showQRScreen = show;
+
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+    })
+
+    socket.on('mod message', (message) => {
+      state.welcomeMessage = message
+
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+    })
+
     socket.on('report role', (role) => {
-      if (role == 'mod' || role == 'screen' || role == 'musician')
+      if (role == 'mod' || role == 'screen' || role == 'musician' || role == 'yenting')
         socket.join('display channel');
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
     })
 
     socket.on('send reset', () => {

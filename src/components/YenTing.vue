@@ -3,22 +3,35 @@
     <canvas class="static" ref="canvas"></canvas>
     <h1 class="url">live.yentinglo.net</h1>
 
-    <p id="welcome">Welcome! wait for YenTing...</p>
+
+    <p id="mod-message" v-if="!isMod && message.length > 0">{{ message }}</p>
+    
+    <p id="welcome" v-else>Welcome! wait for YenTing...</p>
+
+    <textarea v-if="isMod" v-model="message" placeholder="message" @change="setMessage()"></textarea>
   </div>
 </template>
 
 <script>
+import socket from '@/socket.js'
+
 export default {
   data() {
     return {
+      socket: socket,
       canvas: null,
       ctx: null,
       width: null,
       height: null,
+      isMod: this.$route.query.role === 'mod',
+      message: "",
     }
   },
   mounted() {
     this.canvas = this.$refs.canvas;
+    
+    this.socket.on('new state', this.setState)
+    this.socket.emit('join',this.setState)
 
     // this.ctx = this.canvas.getContext('2d');
     // this.ctx.fillStyle = "#e6e6e6"
@@ -32,6 +45,16 @@ export default {
     // window.requestAnimationFrame(this.draw)
   },
   methods: {
+    setState(state) {
+      this.message = state.welcomeMessage;
+    },
+    setMessage()
+    {
+      if (this.isMod)
+      {
+        socket.emit('mod message', this.message);
+      }
+    },
     draw() {
       //const imageData = this.ctx.getImageData(0, 0, this.width, this.height)
       //this.ctx.fillRect(0, 0, this.width, this.height);
@@ -76,6 +99,13 @@ export default {
   padding: 0;
   margin: 0;
   z-index: -1;
+}
+
+#mod-message {
+  font-size: 1.5rem;
+  margin: 2em 0 2em 0;
+  text-align: center;
+  white-space: pre-line;
 }
 
 

@@ -30,11 +30,14 @@
     <div id="description-noletters" v-if="!canInputWords && loveLetters.length == 0" >
       Waiting for your love letters...
     </div>
+    <div id="description-noletters" v-if="isScreen && loveLetters.length != 0" >
+      {{`Received ${loveLetters.length} love letters <3`}}
+    </div>
     
-    <div align='left' v-if="!canInputWords && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
+    <div align='left' v-if="!isScreen && !canInputWords && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
       {{loveLetters[loveLetterId%loveLetters.length]}}
     </div>
-    <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !isMod}" @click="showNextLetter()">
+    <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !canReadLetters}" @click="showNextLetter()">
       {{unseenLetterCount == 0? "No new letters" : "Open new received letter"}}
       <div v-if="unseenLetterCount > 0" id="letters-count"><div>{{ unseenLetterCount }}</div></div>
     </div>
@@ -78,6 +81,7 @@ export default {
     return {
       socket: socket,
       isMod: this.$route.query.role === 'mod',
+      isYenTing: this.$route.query.role === 'yenting',
       isScreen: this.$route.query.role === 'screen',
       isMusician: this.$route.query.role === 'musician',
       areWordsSent: false,
@@ -114,7 +118,7 @@ export default {
 
   computed: {
     canInputWords() {
-      return !this.isMod && !this.isScreen && !this.isMusician;
+      return !this.isMod && !this.isScreen && !this.isMusician && !this.isYenTing;
     },
     canSendLetter() {
       let allWritten = this.writtenWords.length > 0;
@@ -127,6 +131,9 @@ export default {
     },
     unseenLetterCount() {
       return this.loveLetters.length - this.loveLettersSeen;
+    },
+    canReadLetters() {
+      return this.isMod || this.isYenTing;
     }
   },
 
@@ -207,7 +214,7 @@ export default {
       this.loveLettersSeen = newDisplayState.loveLettersSeen;
     },
     showNextLetter() {
-      if (this.isMod)
+      if (this.canReadLetters)
       {
         if (this.loveLetterId < this.loveLetters.length - 1) {
           this.loveLetterId ++;

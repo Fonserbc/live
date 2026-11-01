@@ -1,9 +1,9 @@
 <template>
   <div id="container">
     <h1 id="title">
-      Ordered Sentence
+      排序照句
     </h1>
-    <div v-if="canInputWords && !areWordsSent" id="explanation">
+    <div v-if="false && canInputWords && !areWordsSent" id="explanation">
       Form a sentence. You can only submit once.
     </div>
     <div v-if="canInputWords && areWordsSent" id="after-sent">

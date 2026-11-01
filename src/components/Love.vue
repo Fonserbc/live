@@ -28,7 +28,7 @@
     </div>
 
     <div id="description-noletters" v-if="!canInputWords && loveLetters.length == 0" >
-      Waiting for your love letters...
+      等待你的情詩...
     </div>
     <div id="description-noletters" v-if="isScreen && loveLetters.length != 0" >
       {{`Received ${loveLetters.length} love letters <3`}}

@@ -4,7 +4,7 @@
     <div :class="{columncontainer: isScreen}">
       <div :class="{ poemcolumn: isScreen, column1: isScreen }">
         <h1 id="title">
-          Path
+          Paths
         </h1>
         <p v-for="(line, index) in pathWords" :key="index" :class="['line', `line-${index}`]">
           <span>{{ line[0].substring(0, line[0].indexOf("$")) }}</span>

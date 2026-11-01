@@ -45,7 +45,12 @@
 
     <component v-if="game !== undefined && game != ''" :is="game" />
 
-    <canvas v-if="game === 'YenTing'" ref="canvasBig" id="qrcode-big"></canvas>
+    <div v-if="game === 'YenTing'" id="yenting-qr-container">
+      <canvas ref="canvasBig" id="qrcode-big"></canvas>
+      <div>live.yentinglo.net</div>
+    </div>
+
+    
     <!-- <p v-if="game === 'YenTing'" style="text-align:center;">Let your neighbour scan and join!</p> -->
 
   </main>
@@ -147,7 +152,7 @@ export default {
 
       if (this.$refs.canvasBig) {
         QRCode.toCanvas(this.$refs.canvasBig, this.url, {
-          scale: 8,
+          scale: 12,
           margin: 0,
           color: {
             dark: '#000',  // Black dots
@@ -262,6 +267,20 @@ export default {
 
   .qrcode {
     font-size: 1.2rem;
+  }
+
+  #yenting-qr-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    padding: 0.5em;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: black;
+    z-index: 2;
   }
 
   #screen-qr-container {

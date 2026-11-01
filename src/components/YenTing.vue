@@ -1,12 +1,13 @@
 <template>
   <div>
     <canvas class="static" ref="canvas"></canvas>
-    <h1 class="url">live.yentinglo.net</h1>
+    <h1 class="url">羅妍婷的多重選擇</h1>
+    <h2>YenTing & Your Choices</h2>
 
 
     <p id="mod-message" v-if="!isMod && message.length > 0">{{ message }}</p>
     
-    <p id="welcome" v-else>Welcome! wait for YenTing...</p>
+    <p id="welcome" v-else>Welcome! 請等待指令...</p>
 
     <textarea v-if="isMod" v-model="message" placeholder="message" @change="setMessage()"></textarea>
   </div>
@@ -112,10 +113,19 @@ export default {
 .url {
     margin: 2em;
     text-align: center;
+    margin-bottom: 0.1em;
+    font-size: 2em;
+}
+
+h2 {
+  text-align: center;
+    margin-bottom: 1em;
+    font-size: 1.75em;
 }
 
   #welcome {
     text-align: center;
     margin: 2em 0 2em 0;
+  font-size: 1.5rem;
   }
 </style>

@@ -35,7 +35,7 @@ let state = {
   },
 
   // Order
-  orderEnglishWords: true,
+  orderEnglishWords: false,
 }
 
 let displayState = {
@@ -56,7 +56,7 @@ let votesSets = {
   'leader': [
     'YenTing 妍婷',
     'HsinWei 忻薇',
-    'DongDong 東東'
+    'Chris 東東'
   ],
   'length': [
     'Long note 長音',
@@ -135,7 +135,7 @@ module.exports = function(socketInstance) {
 
       // hard reset stuff
       state.game = 'YenTing';
-      state.orderEnglishWords = true;
+      state.orderEnglishWords = false;
     }
   }
 

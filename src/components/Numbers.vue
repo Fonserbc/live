@@ -4,11 +4,11 @@
     <button v-if="isMod" @click="selectNumber(+1)" class="btn btn--mod next-button">Next</button>
   </div>
   <h1 v-if="!canInputNumbers" id="title-screen">
-    Numbers
+    請撥號
   </h1>
   <div id="container">
     <h1 v-if="canInputNumbers" id="title">
-      Numbers
+    請撥號
     </h1>
     <div v-if="canInputNumbers" id="player-number-container" :class="{'sent-container': numbersLocked}">
       <div v-for="number in currentNumbers" :class="['number-'+number, numberClassObject]">
@@ -192,6 +192,7 @@ export default {
   font-size: 2.5rem;
       line-height: 1.3;
           font-family: 'Noto Sans TC', sans-serif;
+  margin-top: 2rem;
 }
   #container {
     min-width: 10em;
@@ -456,7 +457,7 @@ export default {
   /* This styling only happens if we are a role=screen, and actually I've been only testing it against a 1280p screen */
   @media (max-height: calc(1000px)) and (min-width: calc(1100px)) {
     #title {
-      text-align: left;
+      text-align: center;
     }
   }
 

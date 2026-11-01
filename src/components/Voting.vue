@@ -25,7 +25,7 @@
     </div>
     <div id="content">
     <h1 id="title">
-      Voting
+      可連續投票
     </h1>
     
     <div v-if="votingState=='results'" class="results">
@@ -214,7 +214,8 @@ export default {
 .vote-btn {
   background: white;
   border-radius: 0 0 8px 8px;
-  padding: 1.2em 1em 0.8em;
+  padding: 0.5em;
+  padding-top: 1em;
   width: 100%;
   display: block;
   margin: 1em 0;

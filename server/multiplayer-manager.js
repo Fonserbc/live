@@ -14,7 +14,7 @@ let state = {
 
   // Raven
   ravenState: 'intro',
-  pathState: 'half',
+  pathState: '01',
   votesRaven: {
     Piano: 0,
     Guitar: 0,
@@ -107,7 +107,7 @@ function resetState() {
     state.choices.ChoicesPath.choices[i * 2] = 0;
     state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
   }
-  state.pathState = 'half';
+  state.pathState = '01';
 
   // Display
   displayState.playerNumbers = new Array();
@@ -158,7 +158,7 @@ module.exports = function(socketInstance) {
       socket.broadcast.emit('new state', state)
     }
 
-    function closeWordChoice() {
+    function closeWordChoice(id) {
       let gameState = state.choices[state.game];
       if (gameState === undefined) {
         console.warn("closing a word choice on a game without choices");
@@ -173,6 +173,9 @@ module.exports = function(socketInstance) {
         gameState.openedBy[index] = null;
         index = gameState.openedBy.indexOf(socket.id);
       }
+
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
     }
 
     socket.on('join', () => {
@@ -247,7 +250,7 @@ module.exports = function(socketInstance) {
         return;
 
       if (gameState.openedBy.indexOf(socket.id) > -1)
-        closeWordChoice();
+        closeWordChoice(socket.id);
 
       gameState.openedBy[i] = socket.id;
 
@@ -402,15 +405,29 @@ module.exports = function(socketInstance) {
     })
 
     socket.on('toggle path state', function() {
-      state.pathState = state.pathState != 'half'? 'half' : 'full';
 
-      if (state.pathState == 'full')
+      if (state.pathState == '01')
+        state.pathState = '10';
+      else if (state.pathState == '10')
+        state.pathState = '11';
+      else return;
+
+      state.isLocked = false;
+
+      if (state.pathState == '10')
       {
         for (let i = 0; i < state.choices["ChoicesPath"].choices.length; ++i)
         {
           if (i%2==0) {
             state.choices["ChoicesPath"].choices[i] = -1;
           }
+        }
+      }
+      else if (state.pathState == '11')
+      {
+        for (let i = 0; i < state.choices["ChoicesPath"].choices.length; ++i)
+        {
+          state.choices["ChoicesPath"].choices[i] = -1;
         }
       }
 

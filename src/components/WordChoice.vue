@@ -60,7 +60,7 @@ export default {
       return this.choiceId < 0? "" : this.choices[this.choiceId]
     },
     lockedWord() {
-      return this.isLocked && this.choiceId >= 0;
+      return (this.isLocked || !this.pathOpen) && this.choiceId >= 0;
     }
   },
   methods: {
@@ -137,6 +137,8 @@ export default {
   }
   .path-closed>.choice-button.first-word {
     color: unset;
+  }
+  .path-closed>.choice-button {
     text-decoration: none;
   }
 

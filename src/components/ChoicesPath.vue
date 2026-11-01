@@ -8,11 +8,11 @@
         </h1>
         <p v-for="(line, index) in pathWords" :key="index" :class="['line', `line-${index}`]">
           <span>{{ line[0].substring(0, line[0].indexOf("$")) }}</span>
-          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :pathOpen="pathState != 'half'":choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
+          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :pathOpen="pathState[0] == '1'" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
           <!-- {{ line[1][pathFirstChoice[index]]}} -->
           <span>{{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) + " "}}</span>
           <!-- {{ line[2][pathSecondChoice[index]] }} -->
-          <WordChoice :id="index * 2 + 1" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices='line[2]' :openedBy="openedBy" :socket='socket' :syncChoices="pathChoices" :initialChoiceId="pathChoices[index * 2 + 1]"/>
+          <WordChoice :id="index * 2 + 1" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices='line[2]' :pathOpen="pathState[1] == '1'" :openedBy="openedBy" :socket='socket' :syncChoices="pathChoices" :initialChoiceId="pathChoices[index * 2 + 1]"/>
         </p>
         <!-- <p>
           <span>長頭髮的<WordSelector i="0" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='1' :wordList='wordList' :blankList='blankList' :socket='socket' />住在<WordSelector i="1" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' />裡</span>
@@ -65,7 +65,7 @@ export default {
       pathChoices: new Array(pathWords.length * 2),
       openedBy: new Array(pathWords.length * 2),
       isLocked: false,
-      pathState: 'half',
+      pathState: '01',
       url: '',
 
       // Only one WordSelector is allowed open at a time.

@@ -234,7 +234,7 @@ export default {
 
 .vote-count {
   font-weight: normal;
-  margin-left: auto;
+  margin-left: 0.5em;
   margin-right: 0.5em;
   text-align: right;
   transition: all 0.2s;
@@ -264,6 +264,10 @@ export default {
  stroke: #C4C4C4;
  transform: scale(1);
  transform-origin: 50%;
+}
+
+.screen>.results-flex {
+  align-items: start;
 }
 
 .vote-btn:active svg path {
@@ -297,11 +301,17 @@ export default {
 
 .result-column {
   flex: 1 1 auto;
+  /* width: 40vw;
+  max-width: 20rem;
+  min-width: 10rem; */
   padding-left: 1rem;
   padding-right: 1rem;
-  width: 40vw;
-  max-width: 20rem;
-  min-width: 10rem;
+}
+
+.screen>.results-flex>.result-column
+{
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 .result-column:first-child:not(:last-child) {
@@ -358,6 +368,21 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 0.2em 1em;
+}
+
+li.vote-btn {
+  text-wrap: nowrap;
+  transition: all 0.3s;
+}
+
+li.vote-btn:first-child {
+  transform: scale(1.1);
+  border: black solid 2px;
+}
+
+li.vote-btn:not(:first-child) {
+  color: #828282;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
 }
 
 .list-move, /* apply transition to moving elements */

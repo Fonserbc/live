@@ -14,6 +14,7 @@
           <option>Order</option>
           <option>Voting</option>
           <option>Love</option>
+          <option>Tumbleweed</option>
         </select>
       </div>
       <!-- <div class="mod-panel__controls"> -->
@@ -68,10 +69,11 @@ import Numbers from './Numbers.vue'
 import Order from './Order.vue'
 import Voting from './Voting.vue'
 import Love from './Love.vue'
+import Tumbleweed from './Tumbleweed.vue'
 
 
 export default {
-  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love },
+  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love, Tumbleweed },
   data() {
     return {
       socket: socket,
@@ -249,8 +251,8 @@ export default {
 
     align-self: flex-end;
 
-    width: 3.7em !important;
-    height: 3.7em !important;
+    /* width: 3.7em !important;
+    height: 3.7em !important; */
     padding: 0.5em;
     background: white;
     z-index: 1;

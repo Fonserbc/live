@@ -1,7 +1,7 @@
 <template>
   <div id="container">
     <h1 id="title" class="cursive-bold">
-      Writting Love
+      Writing Love
     </h1>
     <!-- <div v-if="canInputWords && languageChosen && !areWordsSent" id="explanation">
       Fill in the words in this love letter
@@ -27,17 +27,17 @@
       </p>
     </div>
 
-    <div id="description-noletters" v-if="!canInputWords && loveLetters.length == 0" >
+    <div id="description-noletters" v-if="!canInputWords" >
       等待你的情詩...
     </div>
-    <div id="description-noletters" v-if="isScreen && loveLetters.length != 0" >
+    <div id="description-noletters" v-if="false && isScreen && loveLetters.length != 0" >
       {{`Received ${loveLetters.length} love letters <3`}}
     </div>
     
     <div align='left' v-if="!isScreen && !canInputWords && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
       {{loveLetters[loveLetterId%loveLetters.length]}}
     </div>
-    <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !canReadLetters}" @click="showNextLetter()">
+    <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0 && !isScreen" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !canReadLetters}" @click="showNextLetter()">
       {{unseenLetterCount == 0? "No new letters" : "Open new received letter"}}
       <div v-if="unseenLetterCount > 0" id="letters-count"><div>{{ unseenLetterCount }}</div></div>
     </div>
@@ -246,9 +246,13 @@ export default {
     padding: 0.5em 0.5em 1em;
     text-align: center;
   }
+  #description-noletters {
+    font-size: 1.75em;
+  }
   h1 {
+    margin-top: 2rem;
     text-align: center;
-    font-size: 4rem;
+    font-size: 6rem;
   }
   #input-container {
     width: 100%;

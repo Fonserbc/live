@@ -189,6 +189,7 @@ export default {
   }
   h1 {
     text-align: center;
+    font-size: 3.5rem;
   }
   #input-container {
     position: absolute;
@@ -279,7 +280,7 @@ export default {
   }
   .sentence {
     display: flex;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     white-space: nowrap;
     margin-top: 0.35rem;
   }

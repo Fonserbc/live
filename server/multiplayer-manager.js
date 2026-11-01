@@ -56,7 +56,7 @@ let votesSets = {
   'leader': [
     'YenTing 妍婷',
     'HsinWei 忻薇',
-    'Chris 東東'
+    'Christopher 東東'
   ],
   'length': [
     'Long note 長音',

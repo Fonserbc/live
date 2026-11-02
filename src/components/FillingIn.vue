@@ -62,7 +62,7 @@ export default {
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
-      //openWordSelectorIndex: -1,
+      openWordSelectorIndex: -1,
     }
   },
 
@@ -85,6 +85,7 @@ export default {
       console.log('connected')
     },
     wordSelectorOpen(i) {
+      this.openWordSelectorIndex = i;
     },
     wordSelectorClose() {
       this.openWordSelectorIndex = -1
@@ -136,6 +137,11 @@ export default {
     setState(newState) {
       this.blankList = newState.blankList
       this.isLocked = newState.isLocked
+
+      if (this.openWordSelectorIndex >= 0 && this.blankList[this.openWordSelectorIndex] != this.socket.id)
+      {
+        this.openWordSelectorIndex = -1;
+      }
     }
   },
 }

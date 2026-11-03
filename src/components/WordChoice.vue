@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  props: ['id', 'anchor', 'choices', 'openedBy', 'syncChoices', 'socket', 'isLocked', 'initialChoiceId', 'pathOpen'],
+  props: ['id', 'anchor', 'choices', 'openedBy', 'syncChoices', 'socket', 'isLocked', 'initialChoiceId', 'pathOpen', 'pathState'],
   setup(props) {
   },
   computed: {
@@ -42,6 +42,7 @@ export default {
         'word-selector--is-being-edited-by-me': this.isBeingEditedByMe,
         'locked': this.isLocked,
         'path-closed': !this.pathOpen,
+        'path-invisible': !this.pathOpen && this.pathState == '01',
       }
     },
     "underscores": function() {
@@ -135,7 +136,7 @@ export default {
   .choice-button.first-word {
     color: #e05f0e;
   }
-  .path-closed>.choice-button.first-word {
+  .path-closed.path-invisible>.choice-button.first-word {
     color: unset;
   }
   .path-closed>.choice-button {

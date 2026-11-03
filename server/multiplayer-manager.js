@@ -261,10 +261,6 @@ module.exports = function(socketInstance) {
     socket.on('close word choice', closeWordChoice);
 
     socket.on('send numbers', (n) => {
-      let maxNumbers = 32;
-
-      if (displayState.playerNumbers.length > maxNumbers)
-        displayState.playerNumbers.shift();
 
       let id = socket.id + Date.now();
 
@@ -409,6 +405,8 @@ module.exports = function(socketInstance) {
       if (state.pathState == '01')
         state.pathState = '10';
       else if (state.pathState == '10')
+        state.pathState = '010';
+      else if (state.pathState == '010')
         state.pathState = '11';
       else return;
 
@@ -419,6 +417,15 @@ module.exports = function(socketInstance) {
         for (let i = 0; i < state.choices["ChoicesPath"].choices.length; ++i)
         {
           if (i%2==0) {
+            state.choices["ChoicesPath"].choices[i] = -1;
+          }
+        }
+      }
+      else if (state.pathState == '010')
+      {
+        for (let i = 0; i < state.choices["ChoicesPath"].choices.length; ++i)
+        {
+          if (i%2==1) {
             state.choices["ChoicesPath"].choices[i] = -1;
           }
         }

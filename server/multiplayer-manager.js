@@ -2,6 +2,7 @@ let wordList = require('./fei-words.js')
 let pathWords = require('./path-words.js')
 
 let state = {
+  lang: 'en', // en, tw
   // Player
 
   game: 'YenTing',
@@ -183,6 +184,12 @@ module.exports = function(socketInstance) {
       if (socket.rooms.has('display channel'))
         socket.emit('new display state', displayState)
     })
+
+    socket.on('set lang', (l) => {
+      state.lang = l;
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+    });
 
     socket.on('show qr screen', (show) => {
       state.showQRScreen = show;

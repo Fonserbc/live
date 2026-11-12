@@ -20,6 +20,8 @@
       <!-- <div class="mod-panel__controls"> -->
         <input type="checkbox" v-model="showQRScreen" @change="showQRCheck()">Show QR on Screen</input>
 
+        <button v-if="game === 'YenTing'" class="btn btn--mod" @click="toggleLanguage()">{{lang}}</button>
+
         <button v-if="!isLocked && canGameBeLocked" @click="sendLock()" class="btn btn--mod">🔓 Unlocked</button>
         <button v-if="isLocked && canGameBeLocked" @click="sendUnlock()" class="btn btn--mod">🔒 Locked</button>
         
@@ -44,7 +46,7 @@
     </div>
     
 
-    <component v-if="game !== undefined && game != ''" :is="game" />
+    <component v-if="game !== undefined && game != ''" :is="game" v-bind="$data" />
 
     <div v-if="game === 'YenTing'" id="yenting-qr-container">
       <canvas ref="canvasBig" id="qrcode-big"></canvas>
@@ -79,17 +81,19 @@ export default {
       socket: socket,
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
+      isYenTing: this.$route.query.role === 'yenting',
+      isMusician: this.$route.query.role === 'musician',
       wordList,
       blankList: new Array(wordList.length),
       isLocked: false,
       url: '',
-
       game: '',
       ravenState: 'intro',
       pathState: 'half',
       showQRScreen: true,
 
       orderEnglishWords: true,
+      lang: 'en',
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
@@ -134,6 +138,13 @@ export default {
   },
 
   methods: {
+    toggleLanguage() {
+      if (this.lang == 'en')
+        this.lang = 'tw'
+      else this.lang = 'en';
+
+      this.socket.emit('set lang', this.lang);
+    },
     togglePathState() {
       this.socket.emit('toggle path state');
     },
@@ -228,6 +239,7 @@ export default {
       this.ravenState = newState.ravenState
       this.pathState = newState.pathState;
       this.orderEnglishWords = newState.orderEnglishWords;
+      this.lang = newState.lang;
       let qr = this.showQRScreen
       this.showQRScreen = newState.showQRScreen;
       if (!qr && newState.showQRScreen) {

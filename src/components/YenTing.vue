@@ -1,14 +1,14 @@
 <template>
   <div>
     <canvas class="static" ref="canvas"></canvas>
-    <h1 class="url" v-if="lang === 'tw'">羅妍婷的多重選擇</h1>
+    <h1 class="url" v-if="lang === 'zh'">羅妍婷的多重選擇</h1>
     <h1 class="url" v-if="lang === 'en'">YenTing & Your Choices</h1>
     <h2 v-else>YenTing & Your Choices</h2>
 
 
     <p id="mod-message" v-if="!isMod && message.length > 0">{{ message }}</p>
     
-    <p id="welcome" v-else>Welcome! {{lang == "tw"? "請等待指令" : "Please wait"}}...</p>
+    <p id="welcome" v-else>Welcome! {{lang == "zh"? "請等待指令" : "Please wait"}}...</p>
 
     <textarea v-if="isMod" v-model="message" placeholder="message" @change="setMessage()"></textarea>
   </div>

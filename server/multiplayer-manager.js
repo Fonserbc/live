@@ -49,8 +49,8 @@ let displayState = {
 
   // Love
   loveLetters: new Array(),
+  approvedLetters: new Array(),
   loveLetterId: -1,
-  loveLettersSeen: 0,
 }
 
 let votesSets = {
@@ -117,8 +117,8 @@ function resetState() {
   displayState.orderedSentences = new Array();
 
   displayState.loveLetters = new Array();
+  displayState.approvedLetters = new Array();
   displayState.loveLetterId = -1;
-  displayState.loveLettersSeen = 0;
 }
 
 
@@ -297,9 +297,34 @@ module.exports = function(socketInstance) {
       io.to('display channel').emit('new display state', displayState);
     });
     
-    socket.on('visualize letter', (id, seenCount) => {
+    function showLetter(id) {
       displayState.loveLetterId = id;
-      displayState.loveLettersSeen = seenCount;
+
+      let it = displayState.approvedLetters.indexOf(id);
+      if (it >= 0)
+        displayState.approvedLetters.splice(it, 1);
+
+      io.to('display channel').emit('new display state', displayState);
+    }
+
+    socket.on('visualize letter', (id) => {
+      showLetter(id);
+    });
+    socket.on('change approved letter', (id, approved) => {
+
+      if (approved) {
+        if (displayState.approvedLetters.indexOf(id) < 0) {
+
+          if (displayState.loveLetterId < 0)
+            displayState.loveLetterId = id;
+          else displayState.approvedLetters.push(id);
+        }
+      }
+      else {
+        let it = displayState.approvedLetters.indexOf(id);
+        if (it >= 0)
+          displayState.approvedLetters.splice(it, 1);
+      }
 
       io.to('display channel').emit('new display state', displayState);
     });

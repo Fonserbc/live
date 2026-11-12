@@ -10,6 +10,7 @@
       <div id="en-button" class="button" @click="chooseLanguage('en')">English</div>
       <div id="zh-button" class="button" @click="chooseLanguage('zh')">中文</div>
     </div>
+    <!-- Sent letter -->
     <div v-if="(canInputWords && areWordsSent) || (!canInputWords && sentLetter.length > 0)">
       <div align='left' class="sent-letter-container">
         {{ sentLetter }}
@@ -17,6 +18,7 @@
       <div v-if="canInputWords" id="sent-info" class="cursive">Sent ✓</div>
     </div>
 
+    <!-- Sending letter -->
     <div v-if="canInputWords && !areWordsSent" id="letter-container">
       <p align='left' v-for="(line, index) in processedLines" :key="index" class="line">
         <span v-for="(subLine, id) in line" :key="id" class="sub-line-container">
@@ -26,23 +28,35 @@
         <p v-if="index==0 || index == processedLines.length-2"><br></p>
       </p>
     </div>
-
-    <div id="description-noletters" v-if="!canInputWords" >
-      等待你的情詩...
-    </div>
-    <div id="description-noletters" v-if="false && isScreen && loveLetters.length != 0" >
-      {{`Received ${loveLetters.length} love letters <3`}}
-    </div>
-    
-    <div align='left' v-if="!isScreen && !canInputWords && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
-      {{loveLetters[loveLetterId%loveLetters.length]}}
-    </div>
-    <div id="open-letter-button" v-if="!canInputWords && unseenLetterCount > 0 && !isScreen" :class="{'button': true, 'disabled': unseenLetterCount == 0 || !canReadLetters}" @click="showNextLetter()">
-      {{unseenLetterCount == 0? "No new letters" : "Open new received letter"}}
-      <div v-if="unseenLetterCount > 0" id="letters-count"><div>{{ unseenLetterCount }}</div></div>
-    </div>
     <div v-if="canInputWords && !areWordsSent && languageChosen" id="input-container">
       <div id="send-button" class="input-button" @click="sendPressed()" :class="{'button': true, 'send-disabled': !canSendLetter}">Send</div>
+    </div>
+
+    <div id="description-noletters" v-if="isScreen" >
+      {{lang == "zh"? "等待你的情詩..." : "Waiting for your love letters..."}}
+    </div>
+    <div id="description-noletters" v-if="false && (isYenTing || isMod)" >
+      {{`Received ${loveLetters.length}, approved ${approvedLetters.length}`}}
+    </div>
+    
+    <div align='left' v-if="(isYenTing || isMusician) && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
+      {{loveLetters[loveLetterId%loveLetters.length]}}
+    </div>
+
+    <div id="open-letter-button" v-if="isYenTing || isMod" :class="{'button': true, 'disabled': unseenLetterCount == 0}" @click="showNextLetter()">
+      {{"Open next approved letter"}}
+      <div v-if="unseenLetterCount > 0" id="letters-count"><div>{{ unseenLetterCount }}</div></div>
+    </div>
+
+    <div align='left' v-if="isYenTing && approvedLetters.length > 0" class="sent-letter-container preview" >
+      <!-- <div style="margin-bottom: 1em; font-size: 0.8em;">Next one ({{ approvedLetters[0] }}): </div>       -->
+      <div>{{loveLetters[approvedLetters[0]]}}</div>
+    </div>
+
+    <div v-if="isMod" v-for="(letter, index) in loveLetters" :key="index" :class="{'approval-container': true, 'hiding': approvalMap.has(index) && !approvalMap.get(index).show, 'approved': approvalMap.has(index) && approvalMap.get(index).approved,  'denied': approvalMap.has(index) && !approvalMap.get(index).approved }">
+      <div :class="{'approval-id': true, 'seen': index == loveLetterId}" @click="toggleLetterShow(index)">{{ index == loveLetterId? "👁️" : index }}</div>
+      <div align='left' v-if="!approvalMap.has(index) || approvalMap.get(index).show">{{ letter }}</div>
+      <div class="approve-container"><div style="color: green" class="button" @click="approveLetter(index)">Approve</div><div style="color: red" class="button" @click="disproveLetter(index)">Don't approve</div></div>
     </div>
   </div>
   
@@ -77,26 +91,25 @@ const wordsZh = [
 // Only send one sentence per player once
 
 export default {
+  props: ['isMod', 'isYenTing', 'isScreen', 'isMusician', 'lang'],
   data() {
     return {
       socket: socket,
-      isMod: this.$route.query.role === 'mod',
-      isYenTing: this.$route.query.role === 'yenting',
-      isScreen: this.$route.query.role === 'screen',
-      isMusician: this.$route.query.role === 'musician',
       areWordsSent: false,
-      lang: '',
+      letterLanguage: '',
       processedLines: [],
       writtenWords: [],
       sentLetter: "",
       loveLetters: [],
-      loveLetterId: -1,
-      loveLettersSeen: 0,
+      loveLetterId: 0,
+      approvedLetters: [],
+      approvalMap: new Map(),
     }
   },
 
   beforeMount() {
     this.init();
+    this.newLetterAllowed();
   },
 
   mounted() {
@@ -127,10 +140,10 @@ export default {
       return allWritten && !this.areWordsSent;
     },
     languageChosen() {
-      return this.lang != '';
+      return this.letterLanguage != '';
     },
     unseenLetterCount() {
-      return this.loveLetters.length - this.loveLettersSeen;
+      return this.approvedLetters.length;
     },
     canReadLetters() {
       return this.isMod || this.isYenTing;
@@ -140,17 +153,17 @@ export default {
   methods: {
     init() {
         this.areWordsSent = false;
-        this.lang = '';
+        this.letterLanguage = '';
         this.processedLines = [];
         this.writtenWords = [];
         this.sentLetter = "";
-        this.loveLettersSeen = 0;
         this.loveLetterId = -1;
         this.loveLetters = [];
+        this.approvedLetters = [];
     },
     chooseLanguage(lg)
     {
-      this.lang = lg;
+      this.letterLanguage = lg;
 
       let words = lg == "en"? wordsEn : wordsZh;
       this.processedLines = [];
@@ -181,6 +194,7 @@ export default {
     },
     resetLocal() {
       this.init();
+      this.newLetterAllowed();
     },
     sendPressed()
     {
@@ -211,24 +225,57 @@ export default {
     {
       this.loveLetters = newDisplayState.loveLetters;
       this.loveLetterId = newDisplayState.loveLetterId;
-      this.loveLettersSeen = newDisplayState.loveLettersSeen;
+      this.approvedLetters = newDisplayState.approvedLetters;
     },
     showNextLetter() {
       if (this.canReadLetters)
       {
-        if (this.loveLetterId < this.loveLetters.length - 1) {
-          this.loveLetterId ++;
-          this.loveLettersSeen ++;
-          socket.emit('visualize letter', this.loveLetterId, this.loveLettersSeen);
+        if (this.approvedLetters.length > 0) {
+          this.loveLetterId = this.approvedLetters.shift();
+          socket.emit('visualize letter', this.loveLetterId);
         }
       }
     },
     newLetterAllowed() {
       this.areWordsSent = false;
-      this.lang = '';
       this.processedLines = [];
       this.writtenWords = [];
       this.sentLetter = "";
+      if (this.lang == 'en')
+        this.chooseLanguage(this.lang);
+      else this.letterLanguage = '';
+    },
+    toggleLetterShow(index) {
+      if (this.approvalMap.has(index))
+      { // Only do it if we have already decided on it
+        let w = this.approvalMap.get(index);
+        w.show = !w.show;
+      }
+    },
+    approveLetter(index) {
+      if (!this.approvalMap.has(index))
+      {
+        this.approvalMap.set(index, {show: false, approved: true})
+        socket.emit('change approved letter', index, true);
+      }
+      else {
+        let a = this.approvalMap.get(index);
+        if (!a.approved) {
+          a.approved = true;
+          socket.emit('change approved letter', index, true);
+        }
+      }
+    },
+    disproveLetter(index) {
+      if (!this.approvalMap.has(index))
+      {
+        this.approvalMap.set(index, {show: false, approved: false})
+      }
+      else {
+        let a = this.approvalMap.get(index);
+        a.approved = false;
+      }
+      socket.emit('change approved letter', index, false);
     }
   },
 }
@@ -369,6 +416,7 @@ export default {
     margin-bottom: 2rem;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    pointer-events: none;
   }
   .sent-word {
     font-size: 2rem;
@@ -393,19 +441,55 @@ export default {
   #open-letter-button {
     margin: auto;
     display: inline-block;
-    margin-top: 2rem;
+    position: fixed;
+    bottom: 2rem;
+    margin-right: 1em;
+    z-index: 1;
   }
-  @media (min-width: calc(336px)) {
-    #poemcontainer {
-      /* this font size will grow with the browser */
-      font-size: calc(0.2rem + 5vw);
-    }
+  .approval-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    border: solid black 2px;
+    padding: 0.5em;
+    border-radius: 1em;
   }
-  @media (min-width: calc(590px)) {
-    #poemcontainer {
-      /* cap off font size growth */
-      font-size: 2rem;
-    }
+  .approval-container.hiding {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .approval-id {
+    align-self: flex-start;
+    border-radius: 1em;
+    background-color: white;
+    aspect-ratio: 1;
+    cursor: pointer;
+    width: 2rem;
+  }
+  .approval-id.seen {
+    background-color: #7ad3ff;
+  }
+  .approval-container.approved {
+    background-color: lightgreen;
+  }
+  .approval-container.denied {
+    background-color: lightcoral;
+  }
+  .approve-container {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+    align-self: flex-end;
+  }
+  .approve-container>.button {
+    font-size: 1em;
+  }
+  .preview {
+    font-size: 0.8em;
+    flex-direction: column;
+  }
+  .sent-letter-container.preview {
+    margin-left: 1em;
   }
 
 </style>

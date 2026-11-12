@@ -140,7 +140,7 @@ export default {
   methods: {
     toggleLanguage() {
       if (this.lang == 'en')
-        this.lang = 'tw'
+        this.lang = 'zh'
       else this.lang = 'en';
 
       this.socket.emit('set lang', this.lang);
@@ -161,7 +161,6 @@ export default {
           if (error) console.error(error)
         })
       }
-      else console.log("no canvas found")
 
       if (this.$refs.canvasBig) {
         QRCode.toCanvas(this.$refs.canvasBig, this.url, {
@@ -347,6 +346,7 @@ export default {
     margin-right: 0.25rem;
     padding: 0.5rem;
     transform: scale(1);
+    cursor: pointer;
   }
 
   .button:active {

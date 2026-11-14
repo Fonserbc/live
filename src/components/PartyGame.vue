@@ -37,7 +37,17 @@
         <button v-if="game === 'Love'" @click="allowNewLetter()" class="btn btn--mod">Allow new letter</button>
 
         <button v-if="game !== 'Raven'" @click="offerReset()" class="btn btn--mod">🔄 Reset</button>
+        <button v-if="game === 'Numbers' || game == 'FillingIn'" @click="randomize()" class="btn btn--mod">🎲 Randomize</button>
       <!-- </div> -->
+    </div>
+
+    <div v-if="isScreen" id="circle-bg-container">
+      <img class="circle circle-svg left" src="/circle.svg">
+      <img class="circle circle-svg center" src="/circle.svg">
+      <img class="circle circle-svg right" src="/circle.svg">
+      <img class="circle circle-svg-2 left" src="/circle14.svg">
+      <img class="circle circle-svg-2 center" src="/circle14.svg">
+      <img class="circle circle-svg-2 right" src="/circle14.svg">
     </div>
 
     <div v-if="game !== 'YenTing' && isScreen && showQRScreen" id="screen-qr-container">
@@ -230,6 +240,9 @@ export default {
     allowNewLetter() {
       this.socket.emit('allow new letter');
     },
+    randomize() {
+      this.socket.emit('randomize', this.game);
+    },
 
     setState(newState) {
       this.blankList = newState.blankList
@@ -267,6 +280,55 @@ export default {
     padding: 0.5em;
     background: white;
     z-index: 1;
+  }
+
+  #circle-bg-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -2;
+    background-color: black;
+    overflow: hidden;
+    background-image: url('/yenting lo_white_padding_small_30_fill.png');
+    background-size: 256px;
+  }
+
+  .circle {
+    overflow: hidden;
+    position: absolute;
+    height: 100%;
+    aspect-ratio: 1;
+    top:0;
+  }
+
+  .circle-svg {
+    animation: rotateForever 160s linear infinite;
+    filter:brightness(95%);
+  }
+  .circle-svg-2 {
+    animation: rotateForever 240s linear infinite;
+  }
+  .circle.left {
+    left:0;
+    animation-delay: -180s;
+  }
+  .circle.right {
+    right:0;
+    animation-delay: -90s;
+  }
+  .circle.center {
+    width:100%;
+  }
+
+  @keyframes rotateForever {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   #qrcode-big {
@@ -311,6 +373,7 @@ export default {
     font-size: 1.5rem;
     color: black;
     z-index: 2;
+    background-color: white;
   }
 
   .qrcodescreen {

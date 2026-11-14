@@ -4,11 +4,11 @@
     <button v-if="isMod" @click="selectNumber(+1)" class="btn btn--mod next-button">Next</button>
   </div>
   <h1 v-if="!canInputNumbers" id="title-screen">
-    請撥號
+    {{lang == 'zh'? '請撥號' : 'Numbers'}}
   </h1>
   <div id="container">
     <h1 v-if="canInputNumbers" id="title">
-    請撥號
+    {{lang == 'zh'? '請撥號' : 'Numbers'}}
     </h1>
     <div v-if="canInputNumbers" id="player-number-container" :class="{'sent-container': numbersLocked}">
       <div v-for="number in currentNumbers" :class="['number-'+number, numberClassObject]">
@@ -36,7 +36,7 @@
           </div>
         </div>
       </div>
-      <div id="gradient-after"></div>
+      <!-- <div id="gradient-after"></div> -->
     </div>
     
   </div>
@@ -73,18 +73,15 @@ import socket from '@/socket.js'
 
 
 export default {
+  props: ['lang', 'isMod', 'isScreen', 'isMusician', 'isLocked'],
   data() {
     return {
       socket: socket,
-      isMod: this.$route.query.role === 'mod',
-      isScreen: this.$route.query.role === 'screen',
-      isMusician: this.$route.query.role === 'musician',
       url: '',
       currentNumbers: [],
       numbersLocked: false,
       playerNumbers: [],
       selectedId: -1,
-      isLocked: false,
     }
   },
 
@@ -95,14 +92,14 @@ export default {
     this.url = window.location.protocol + '//' + window.location.host + window.location.pathname
 
     this.socket.on('connect', this.connect);
-    this.socket.on('new state', this.setState);
+    // this.socket.on('new state', this.setState);
     this.socket.on('new display state', this.newDisplayState);
     if (!this.canInputNumbers)
       this.numbersLocked = true;
     
-    this.socket.emit('join', (state) => {
-      this.setState(state);
-    });
+    // this.socket.emit('join', (state) => {
+    //   this.setState(state);
+    // });
   },
 
   beforeUnmount() {
@@ -135,9 +132,9 @@ export default {
     sendReset() {
       this.socket.emit('send reset')
     },
-    setState(newState) {
-      this.isLocked = newState.isLocked;
-    },
+    // setState(newState) {
+    //   this.isLocked = newState.isLocked;
+    // },
     numberPressed(n)
     {
       if (!this.isLocked && !this.numbersLocked && this.currentNumbers.length < 10) {

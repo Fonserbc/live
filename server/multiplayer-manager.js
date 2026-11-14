@@ -520,6 +520,23 @@ module.exports = function(socketInstance) {
       }
     })
 
+    socket.on('randomize', (game) => {
+      if (game == 'Numbers')
+      {
+        for (let i = 0; i < 10; ++i)
+        {
+          let count = Math.max(Math.floor(Math.random()*10), 3);
+          let n = [];
+          for (let j = 0; j < count; ++j)
+          {
+            n.push(Math.floor(Math.random()*9) + 1);
+          }
+          displayState.playerNumbers.push([n, i.toString()]);
+        }
+        io.to('display channel').emit('new display state', displayState);
+      }
+    })
+
     socket.on('disconnect', function (fn) {
       closeWordSelector()
       closeWordChoice();

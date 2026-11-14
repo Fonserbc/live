@@ -29,10 +29,12 @@
   </div>
   <div v-if="canInputWords && !areWordsSent" id="input-container">
     <div id="input-main">
-      <div v-for="([id, word], index) in unchosenWords" :key="id" class="button" @click="chooseWord(index)">
+      <div v-for="([id, word], index) in unchosenWords" :key="id" :class="{'button': true, 'chose-disabled': !canChoseMoreWords}" @click="chooseWord(index)">
         {{ word }}
       </div>
+      
     </div>
+    <div v-if="!canChoseMoreWords" id="info-max-words">{{ `${chosenWords.length}/${chosenWords.length} words chosen` }}</div>
     <div id="send-button" class="input-button" @click="sendPressed()" :class="{'button': true, 'send-disabled': !canSendOrder}">Submit</div>
   </div>
 </template>
@@ -42,6 +44,7 @@ import socket from '@/socket.js'
 
 const wordsEng = ["wiser", "what", "I", "you", "think", "it", "than", "how", "change", "know", "is", "of", "are"];
 const wordsZh = ["我", "懂", "你", "更", "的", "又", "愛", "了", "白", "想"];
+const maxWords = 9;
 
 // Only send one sentence per player once
 
@@ -83,6 +86,9 @@ export default {
     },
     canSendOrder() {
       return this.chosenWords.length >= 3 && !this.areWordsSent && !this.isLocked;
+    },
+    canChoseMoreWords() {
+      return this.chosenWords.length < maxWords;
     }
   },
 
@@ -124,8 +130,10 @@ export default {
     },
     chooseWord(it)
     {
-      let w = this.unchosenWords.splice(it, 1)[0];
-      this.chosenWords.push(w);
+      if (this.chosenWords.length < maxWords) {
+        let w = this.unchosenWords.splice(it, 1)[0];
+        this.chosenWords.push(w);
+      }
     },
     unchooseWord(it)
     {
@@ -228,6 +236,20 @@ export default {
     background-color: #783737;
     transform: scale(0.87);
     box-shadow: 0rem 0rem rgba(0,0,0,0.5);
+  }
+  .button.chose-disabled {
+    background-color: black;
+    opacity: 0.7;
+    color: darkgray;
+  }
+  .button.chose-disabled:active {
+    background-color: #783737;
+    transform: scale(0.87);
+    box-shadow: 0rem 0rem rgba(0,0,0,0.5);
+  }
+  #info-max-words {
+    font-size: 1.5rem;
+    margin-top: 1rem;
   }
   .input-space {
     margin:0.5rem;

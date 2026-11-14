@@ -1,7 +1,7 @@
 <template>
   <div id="container">
     <h1 id="title">
-      排序照句
+      {{this.lang == 'zh'? "排序照句" : "Ordered words"}}
     </h1>
     <div v-if="false && canInputWords && !areWordsSent" id="explanation">
       Form a sentence. You can only submit once.
@@ -46,13 +46,10 @@ const wordsZh = ["我", "懂", "你", "更", "的", "又", "愛", "了", "白", 
 // Only send one sentence per player once
 
 export default {
+  props: ['lang', 'isMod', 'isScreen', 'isMusician', 'isLocked'],
   data() {
     return {
       socket: socket,
-      isMod: this.$route.query.role === 'mod',
-      isScreen: this.$route.query.role === 'screen',
-      isMusician: this.$route.query.role === 'musician' || this.$route.query.role === 'yenting',
-      url: '',
       unchosenWords: [],
       chosenWords: [],
       orderedSentences: [],
@@ -67,8 +64,6 @@ export default {
   },
 
   mounted() {
-    this.url = window.location.protocol + '//' + window.location.host + window.location.pathname
-
     // this.socket.on('connect', this.connect);
     this.socket.on('new state', this.setState);
     this.socket.on('new display state', this.newDisplayState);
@@ -87,7 +82,7 @@ export default {
       return !this.isMod && !this.isScreen && !this.isMusician;
     },
     canSendOrder() {
-      return this.chosenWords.length >= 3 && !this.areWordsSent;
+      return this.chosenWords.length >= 3 && !this.areWordsSent && !this.isLocked;
     }
   },
 

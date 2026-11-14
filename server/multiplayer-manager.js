@@ -36,7 +36,7 @@ let state = {
   },
 
   // Order
-  orderEnglishWords: false,
+  orderEnglishWords: true,
 }
 
 let displayState = {
@@ -110,6 +110,8 @@ function resetState() {
   }
   state.pathState = '01';
 
+  state.orderEnglishWords = true;
+
   // Display
   displayState.playerNumbers = new Array();
   displayState.selectedNumber = -1;
@@ -136,7 +138,6 @@ module.exports = function(socketInstance) {
 
       // hard reset stuff
       state.game = 'YenTing';
-      state.orderEnglishWords = false;
     }
   }
 

@@ -82,7 +82,7 @@ export default {
       isMod: this.$route.query.role === 'mod',
       isScreen: this.$route.query.role === 'screen',
       isYenTing: this.$route.query.role === 'yenting',
-      isMusician: this.$route.query.role === 'musician',
+      isMusician: this.$route.query.role === 'musician' || this.$route.query.role === 'yenting',
       wordList,
       blankList: new Array(wordList.length),
       isLocked: false,
@@ -115,7 +115,7 @@ export default {
 
   computed: {
     canGameBeLocked() {
-      return this.game == 'FillingIn' || this.game == 'ChoicesPath' || this.game == 'Numbers';
+      return this.game == 'FillingIn' || this.game == 'ChoicesPath' || this.game == 'Numbers' || this.game == 'Order';
     }
   },
 

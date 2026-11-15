@@ -39,7 +39,7 @@
         <button v-if="game === 'Love'" @click="allowNewLetter()" class="btn btn--mod">Allow new letter</button>
 
         <button v-if="game !== 'Raven'" @click="offerReset()" class="btn btn--mod">🔄 Reset</button>
-        <button v-if="game === 'Numbers' || game == 'FillingIn'" @click="randomize()" class="btn btn--mod">🎲 Randomize</button>
+        <button v-if="game === 'Numbers' || game == 'FillingIn' || game == 'Order'" @click="randomize()" class="btn btn--mod">🎲 Randomize</button>
       <!-- </div> -->
     </div>
 
@@ -446,6 +446,9 @@ export default {
     justify-items: center;
     align-items: center;
     justify-content: center;
+    
+    overflow: hidden;
+    /* width: max-content; */
   }
 
   #url {

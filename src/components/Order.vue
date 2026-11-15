@@ -1,7 +1,7 @@
 <template>
-  <div id="container">
+  <div id="container" :class="{'is-screen':isScreen}">
     <h1 id="title">
-      {{this.lang == 'zh'? "排序照句" : "Ordered words"}}
+      {{this.lang == 'zh'? "排序照句" : "Sorting words"}}
     </h1>
     <div v-if="false && canInputWords && !areWordsSent" id="explanation">
       Form a sentence. You can only submit once.
@@ -294,6 +294,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-bottom: 3em;
   }
   .sentence {
     display: flex;
@@ -313,11 +314,9 @@ export default {
       font-size: 2rem;
     }
   }
-  /* This styling only happens if we are a role=screen, and actually I've been only testing it against a 1280p screen */
-  @media (max-height: calc(1000px)) and (min-width: calc(1100px)) {
-    #title {
-      text-align: left;
-    }
+  .is-screen>#title {
+    margin-top: 2rem;
+    font-size: 5rem;
   }
 
 </style>

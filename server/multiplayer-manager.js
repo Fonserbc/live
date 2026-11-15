@@ -354,6 +354,17 @@ module.exports = function(socketInstance) {
     socket.on('lock state', () => {
       console.log('LOCK  ', socket.id)
       state.isLocked = true
+
+      if (state.game == 'Numbers')
+      {
+        if (displayState.selectedNumber + 9 < displayState.playerNumbers.length)
+        {
+          let max = displayState.selectedNumber + 9;
+          displayState.playerNumbers.splice(max, displayState.playerNumbers.length - max);
+        }
+        
+        io.to('display channel').emit('new display state', displayState);
+      }
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
     })
@@ -547,6 +558,27 @@ module.exports = function(socketInstance) {
           }
           displayState.playerNumbers.push([n, i.toString()]);
         }
+        io.to('display channel').emit('new display state', displayState);
+      }
+      if (game == 'Order')
+      {
+        const wordsEng = ["wiser", "what", "I", "you", "think", "it", "than", "how", "change", "know", "is", "of", "are"];
+
+        for (let i = 0; i < 10; ++i)
+        {
+          let length = Math.max(3, Math.floor(Math.random() * 9) + 1);
+          let w = Array.from(wordsEng);
+          let s = "";
+          for (let j = 0; j < length; ++j)
+          {
+            let c = Math.floor(w.length * Math.random());
+            if (j > 0) s += " ";
+            s += w[c];
+            w.splice(c, 1);
+          }
+          displayState.orderedSentences.push(s);
+        }
+        
         io.to('display channel').emit('new display state', displayState);
       }
     })

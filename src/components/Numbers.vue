@@ -24,7 +24,7 @@
           </div>
         </div>
       </div>
-      <div id="gradient-after"></div>
+      <div id="gradient-after" :class="{'is-screen':isScreen}"></div>
       <div id="player-number-container" :class="{'sent-container': selectedId >= 0 && selectedId < playerNumbers.length, 'player-number-display': true}">
         <div v-if="selectedId >= 0 && selectedId < playerNumbers.length" v-for="number in playerNumbers[selectedId][0]" :class="['number-'+number, 'player-number']">
           {{ number }}
@@ -234,9 +234,13 @@ export default {
     position: fixed;
     bottom: calc(50vh);
     height: 50vh;
-    width: 25vw;
+    
+    width: 100vw;
     background: white;
     background: linear-gradient(0deg,rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 1) 100%);
+  }
+  #gradient-after.is-screen {
+    width: 25vw;
     border-radius: 1rem;
   }
   #player-numbers-after {

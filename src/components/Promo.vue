@@ -214,5 +214,6 @@ h2 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
   }
 </style>

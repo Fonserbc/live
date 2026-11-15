@@ -47,10 +47,8 @@
 </template>
 
 <script>
-import QRCode from 'qrcode'
 import socket from '@/socket.js'
 import pathWords from '@/path-words.js'
-// import WordSelector from '@/components/WordSelector.vue'
 import WordChoice from '@/components/WordChoice.vue'
 
 
@@ -82,9 +80,7 @@ export default {
 
     this.socket.on('connect', this.connect)
     this.socket.on('new state', this.setState)
-    this.socket.emit('join', (state) => {
-      this.setState(state);
-    })
+    this.socket.emit('join', this.setState)
   },
 
   beforeUnmount() {

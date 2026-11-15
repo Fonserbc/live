@@ -7,6 +7,24 @@
   --cta: #ff0000;
 }
 
+@font-face {
+  font-family: "Dahlia";
+  src: url("/font/dahlia-bold.otf") format("opentype");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Dahlia";
+  src: url("/font/dahlia-medium.otf") format("opentype");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "Dahlia";
+  src: url("/font/dahlia-regular.otf") format("opentype");
+  font-weight: 400;
+}
+
 *,
 *::before,
 *::after {

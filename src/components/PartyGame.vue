@@ -1,5 +1,5 @@
 <template>
-  <main class="main">
+  <main :class="{'main':true, 'is-screen':isScreen, 'centered':shouldCenterVerticallyMain}">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <div class="mod-panel" v-if="isMod">
 
@@ -15,6 +15,8 @@
           <option>Voting</option>
           <option>Love</option>
           <option>Tumbleweed</option>
+          <option disabled value="">---</option>
+          <option>Promo</option>
         </select>
       </div>
       <!-- <div class="mod-panel__controls"> -->
@@ -60,7 +62,7 @@
 
     <div v-if="game === 'YenTing'" id="yenting-qr-container">
       <canvas ref="canvasBig" id="qrcode-big"></canvas>
-      <div>live.yentinglo.net</div>
+      <div id="url">live.yentinglo.net</div>
     </div>
 
     
@@ -82,10 +84,11 @@ import Order from './Order.vue'
 import Voting from './Voting.vue'
 import Love from './Love.vue'
 import Tumbleweed from './Tumbleweed.vue'
+import Promo from './Promo.vue'
 
 
 export default {
-  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love, Tumbleweed },
+  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love, Tumbleweed, Promo },
   data() {
     return {
       socket: socket,
@@ -126,6 +129,9 @@ export default {
   computed: {
     canGameBeLocked() {
       return this.game == 'FillingIn' || this.game == 'ChoicesPath' || this.game == 'Numbers' || this.game == 'Order';
+    },
+    shouldCenterVerticallyMain() {
+      return this.game == 'YenTing' || this.game == 'ChoicesPath' || this.game == 'Love' || this.game == 'Promo';
     }
   },
 
@@ -174,7 +180,7 @@ export default {
 
       if (this.$refs.canvasBig) {
         QRCode.toCanvas(this.$refs.canvasBig, this.url, {
-          scale: 12,
+          scale: 16,
           margin: 0,
           color: {
             dark: '#000',  // Black dots
@@ -291,7 +297,7 @@ export default {
     z-index: -2;
     background-color: black;
     overflow: hidden;
-    background-image: url('/yenting lo_white_padding_small_30_fill.png');
+    /* background-image: url('/yenting lo_white_padding_small_30_fill.png'); */
     background-size: 256px;
   }
 
@@ -320,6 +326,8 @@ export default {
   }
   .circle.center {
     width:100%;
+    height: 110%;
+    top:-5%;
   }
 
   @keyframes rotateForever {
@@ -428,6 +436,20 @@ export default {
 
   .mod-panel {
     display:flex;
+  }
+
+  .main.is-screen {
+    min-height: 100vh;
+  }
+
+  .main.is-screen.centered {
+    justify-items: center;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #url {
+    font-size: 1.8em;
   }
 
 </style>

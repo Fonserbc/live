@@ -1,6 +1,6 @@
 <template>
   <div id="container">
-    <h1 id="title" class="cursive-bold">
+    <h1 id="title" :class="{'cursive-bold': true, 'is-screen': isScreen}">
       Writing Love
     </h1>
     <!-- <div v-if="canInputWords && languageChosen && !areWordsSent" id="explanation">
@@ -294,7 +294,7 @@ export default {
     text-align: center;
   }
   #description-noletters {
-    font-size: 1.75em;
+    font-size: 1.5em;
   }
   h1 {
     margin-top: 2rem;
@@ -490,6 +490,12 @@ export default {
   }
   .sent-letter-container.preview {
     margin-left: 1em;
+  }
+
+  #title.is-screen {
+    margin-top: 0;
+    font-size: 8rem;
+    white-space: nowrap;
   }
 
 </style>

@@ -1,5 +1,6 @@
 let wordList = require('./fei-words.js')
 let pathWords = require('./path-words.js')
+let promoWords = require('./promo-words.js')
 
 let state = {
   lang: 'en', // en, tw
@@ -32,6 +33,10 @@ let state = {
     'ChoicesPath': {
       openedBy: new Array(pathWords.length * 2),
       choices: new Array(pathWords.length * 2)
+    },
+    'Promo': {
+      openedBy: new Array(promoWords.length * 2),
+      choices: new Array(promoWords.length * 2)
     }
   },
 
@@ -87,7 +92,7 @@ function resetState() {
 
   state.blankList = new Array(wordList.length)
   state.isLocked = false
-  state.showQRScreen = true
+  //state.showQRScreen = true
   state.welcomeMessage = ""
 
   state.ravenState = 'intro'
@@ -109,6 +114,14 @@ function resetState() {
     state.choices.ChoicesPath.choices[i * 2 + 1] = -1;
   }
   state.pathState = '01';
+
+  //Promo
+  state.choices.Promo.choices = new Array(promoWords.length * 2);
+  state.choices.Promo.openedBy = new Array(promoWords.length * 2);
+  for (let i = 0; i < promoWords.length; ++i) {
+    state.choices.Promo.choices[i * 2] = -1;
+    state.choices.Promo.choices[i * 2 + 1] = -1;
+  }
 
   state.orderEnglishWords = true;
 
@@ -138,6 +151,7 @@ module.exports = function(socketInstance) {
 
       // hard reset stuff
       state.game = 'YenTing';
+      state.showQRScreen = true;
     }
   }
 

@@ -1,8 +1,8 @@
 <template>
   <div>
     <canvas class="static" ref="canvas"></canvas>
-    <h1 class="url" v-if="lang === 'zh'">羅妍婷的多重選擇</h1>
-    <h1 class="url" v-if="lang === 'en'">YenTing & Your Choices</h1>
+    <h1 class="title-h1" v-if="lang === 'zh'">羅妍婷的多重選擇</h1>
+    <h1 :class="{'title-h1':true,'is-screen':isScreen}" v-if="lang === 'en'">YenTing & Your Choices</h1>
     <h2 v-else>YenTing & Your Choices</h2>
 
 
@@ -18,7 +18,7 @@
 import socket from '@/socket.js'
 
 export default {
-  props: ['isMod', 'lang', 'socket'],
+  props: ['isMod', 'lang', 'socket', 'isScreen'],
   data() {
     return {
       canvas: null,
@@ -110,11 +110,21 @@ export default {
 }
 
 
-.url {
+.title-h1 {
     margin: 2em;
     text-align: center;
     margin-bottom: 0.1em;
     font-size: 2em;
+}
+
+.title-h1.is-screen {
+  margin-top: 0em;
+    font-size: 4em;
+    white-space: nowrap;
+}
+
+h1 {
+  font-family: 'Dahlia';
 }
 
 h2 {

@@ -24,6 +24,7 @@
           </div>
         </div>
       </div>
+      <div id="gradient-after"></div>
       <div id="player-number-container" :class="{'sent-container': selectedId >= 0 && selectedId < playerNumbers.length, 'player-number-display': true}">
         <div v-if="selectedId >= 0 && selectedId < playerNumbers.length" v-for="number in playerNumbers[selectedId][0]" :class="['number-'+number, 'player-number']">
           {{ number }}
@@ -36,7 +37,6 @@
           </div>
         </div>
       </div>
-      <!-- <div id="gradient-after"></div> -->
     </div>
     
   </div>
@@ -172,10 +172,12 @@ export default {
     },
     selectNumber(delta)
     {
-      this.selectedId = (this.selectedId + delta) % this.playerNumbers.length;
-      if (this.selectedId < 0) this.selectedId += this.playerNumbers.length - 1;
+      if (this.selectedId < this.playerNumbers.length - 1) {
+        this.selectedId = (this.selectedId + delta) % this.playerNumbers.length;
+        if (this.selectedId < 0) this.selectedId += this.playerNumbers.length - 1;
 
-      this.socket.emit("select number", this.selectedId);
+        this.socket.emit("select number", this.selectedId);
+      }
     }
   },
 }
@@ -186,9 +188,8 @@ export default {
   z-index: 1;
   position:relative;
   top:0;
-  font-size: 2.5rem;
-      line-height: 1.3;
-          font-family: 'Noto Sans TC', sans-serif;
+  font-size: 5rem;
+  line-height: 1.3;
   margin-top: 2rem;
 }
   #container {
@@ -227,15 +228,16 @@ export default {
   #player-number-container.player-number-display {
     position: fixed;
     width: min-content;
-    bottom: calc(50vh - 4rem - 4rem);
+    bottom: calc(50vh - 4rem);
   }
   #gradient-after {
     position: fixed;
     bottom: calc(50vh);
     height: 50vh;
-    width: 100vh;
-    background: #F3F3F3;
-    background: linear-gradient(0deg,rgba(243, 243, 243, 0) 0%, rgba(243, 243, 243, 1) 100%);
+    width: 25vw;
+    background: white;
+    background: linear-gradient(0deg,rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 1) 100%);
+    border-radius: 1rem;
   }
   #player-numbers-after {
     display: flex;
@@ -243,7 +245,7 @@ export default {
     align-items: end;
     justify-content: center;
     position: fixed;
-    bottom: calc(50vh);
+    bottom: calc(50vh + 4rem);
     margin: auto;
   }
   #player-numbers-before {
@@ -252,7 +254,7 @@ export default {
     align-items: start;
     justify-content: center;
     position: fixed;
-    top: calc(50vh + 4rem + 4rem);
+    top: calc(50vh + 4rem);
     margin: auto;
   }
   .list-numbers-container {

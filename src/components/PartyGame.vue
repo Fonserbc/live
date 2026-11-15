@@ -15,8 +15,8 @@
           <option>Voting</option>
           <option>Love</option>
           <option>Tumbleweed</option>
-          <option disabled value="">---</option>
-          <option>Promo</option>
+          <!-- <option disabled value="">---</option>
+          <option>Promo</option> -->
         </select>
       </div>
       <!-- <div class="mod-panel__controls"> -->

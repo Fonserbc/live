@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="promo-container">
     <canvas class="static" ref="canvas"></canvas>
     <h1 class="title-h1" v-if="lang === 'zh'">羅妍婷的多重選擇</h1>
     <h1 :class="{'title-h1':true,'is-screen':isScreen}" v-if="lang === 'en'">YenTing & Your Choices</h1>
@@ -26,6 +26,12 @@
       <div class="credits-name"> Ferran Bertomeu Castells</div>
       <div class="credits-title">Computer Keyboard</div>
     </div>
+    <div id="info">
+      <img id="hola-logo" src="/Hola Escolta 2026 - Logo.png" />
+      <div id="info-text">Sat 21st Nov 2026, 13:00<br>First United Building, Manila</div>
+      <img id="fub-logo"src="/FUB Logo.jpg" />
+    </div>
+    <img id="sw-logo"src="/somewarez_network_logo_1.png" />
 
     <textarea v-if="isMod" v-model="message" placeholder="message" @change="setMessage()"></textarea>
   </div>
@@ -118,7 +124,7 @@ h2 {
   #welcome {
     text-align: center;
     margin: 1em 0 1em 0;
-  font-size: 3rem;
+  font-size: 3.2rem;
   font-family: 'Dahlia';
   font-weight: 500;
   }
@@ -131,25 +137,33 @@ h2 {
 
   .credits-name {
     font-size: 3em;
-    font-weight: bold;
+    font-weight: 700;
   }
   .credits-title {
     font-size: 2em;
   }
 
   #promo-content {
-    height: 512px;
+    height: 256px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 4em;
-    gap: 0.3em;
+    font-size: 3.5em;
+    gap: 0.2em;
     margin-bottom: 1em;
+    border-radius: 2rem;
+    /* background-color: rgb(215, 215, 215); */
+    border: rgb(124, 124, 124) solid 3px;
+    box-shadow: 5px 5px 15px rgb(124, 124, 124) ;
+    padding: 1em;
+    padding-bottom: 1.1em;
+    transition: all 0.3s;
   }
 
   #ferran-container {
     margin-top: 2rem;
+    margin-bottom: 3rem;
   }
 
   p {
@@ -163,5 +177,42 @@ h2 {
     display: flex;
     flex-direction: line;
     margin-bottom: 0.3rem;
+  }
+
+  #info {
+    display: flex;
+    flex-direction: line;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #info-text {
+    font-size: 2rem;
+    text-align: center;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    font-weight: 500;
+  }
+
+  #hola-logo {
+    width: 256px;
+  }
+
+  #fub-logo {
+    width: 256px;
+  }
+
+  #sw-logo {
+    width: 256px;
+    margin: auto;
+    display: block;
+    margin-top: 0rem;
+  }
+
+  #promo-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 </style>

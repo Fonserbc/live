@@ -241,7 +241,7 @@ export default {
   }
   #gradient-after.is-screen {
     width: 25vw;
-    border-radius: 1rem;
+    border-radius: 3rem;
   }
   #player-numbers-after {
     display: flex;

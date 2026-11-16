@@ -1,32 +1,45 @@
 <template>
+  <div class="mod-panel" v-if="isMod">
+    <button v-if="isMod" @click="selectOrder(-1)" class="btn btn--mod prev-button">Prev</button>
+    <button v-if="isMod" @click="selectOrder(+1)" class="btn btn--mod next-button">Next</button>
+  </div>
   <div id="container" :class="{'is-screen':isScreen}">
-    <h1 id="title">
-      {{this.lang == 'zh'? "排序照句" : "Sorting words"}}
-    </h1>
-    <div v-if="false && canInputWords && !areWordsSent" id="explanation">
+    
+    <!-- <div v-if="false && canInputWords && !areWordsSent" id="explanation">
       Form a sentence. You can only submit once.
-    </div>
-    <div v-if="canInputWords && areWordsSent" id="after-sent">
+    </div> -->
+    <!-- <div v-if="canInputWords && areWordsSent" id="after-sent">
       <div id="sent-words-container">
         <div v-for="([id, word], index) in chosenWords" :key="id" class="sent-word"">
           {{ word }}
         </div>
       </div>
       <div id="sent-info">Sent ✓</div>
-    </div>
-    <div v-if="canInputWords && !areWordsSent" id="player-order-container">
-      <div v-for="([id, word], index) in chosenWords" :key="id" class="button" @click="unchooseWord(index)">
-        {{ word }}
+    </div> -->
+    <div v-if="canInputWords && !areWordsSent" >
+      <h1 id="title">
+        {{this.lang == 'zh'? "排序照句" : "Words in Order"}}
+      </h1>
+      <div id="player-order-container">
+        <div v-for="([id, word], index) in chosenWords" :key="id" class="button" @click="unchooseWord(index)">
+          {{ word }}
+        </div>
       </div>
     </div>
     
     <!-- TODO scroll synced through network? -->
-    <div v-if="!canInputWords" id="sentences-container">
-      <div v-for="(sentence, index) in orderedSentences" class="sentence">
-        {{ sentence }}
-      </div> 
+    <div v-if="!canInputWords || areWordsSent" id="sentences-container">
+      <div id="scrollable-container" :class="{'is-screen': isScreen, 'is-mod': isMod}" :style="{top: isScreen || isMusician? `${-3.5*selectedOrdered}rem`: '0'}">
+        <div v-for="(sentence, index) in orderedSentences" :class="{'sentence': true, 'selected-sentence': index == selectedOrdered, 'own-sentence': ( sentIterator >= 0 && index == sentIterator)}">
+          {{ sentence }}
+        </div> 
+      </div>
+      <div id="gradient-after" :class="{'is-screen':isScreen}"><h1 id="title">
+        {{this.lang == 'zh'? "排序照句" : "Words in Order"}}
+      </h1></div>
     </div>
   </div>
+
   <div v-if="canInputWords && !areWordsSent" id="input-container">
     <div id="input-main">
       <div v-for="([id, word], index) in unchosenWords" :key="id" :class="{'button': true, 'chose-disabled': !canChoseMoreWords}" @click="chooseWord(index)">
@@ -59,6 +72,8 @@ export default {
       areWordsSent: false,
       englishWords: true,
       words: [],
+      selectedOrdered: 0,
+      sentIterator: -1,
     }
   },
 
@@ -118,6 +133,7 @@ export default {
         }
 
         this.areWordsSent = false;
+        this.sentIterator = -1;
     },
     resetLocal() {
       this.init();
@@ -127,6 +143,10 @@ export default {
       this.englishWords = newState.orderEnglishWords;
       if (wasEnglish != this.englishWords)
         this.resetLocal();
+      
+        
+      this.orderedSentences = newState.orderedSentences;
+      this.selectedOrdered = newState.selectedOrdered;
     },
     chooseWord(it)
     {
@@ -156,8 +176,11 @@ export default {
 
       if (confirm(`send "${s}"?`))
       {
-        this.socket.emit('send order', s);
         this.areWordsSent = true;
+        this.socket.emit('send order', s, (it) => {
+          this.sentIterator = it;
+          console.log(it);
+        });
       }
     },
     openForNewOrder() {
@@ -170,9 +193,15 @@ export default {
         }
       }
     },
-    newDisplayState(newDisplayState)
+    selectOrder(delta)
     {
-      this.orderedSentences = newDisplayState.orderedSentences;
+      if (delta < 0 && this.selectedOrdered == 0) return;
+      if (delta > 0 && this.selectedOrdered >= this.orderedSentences.length - 1) return
+
+      this.selectedOrdered = (this.selectedOrdered + delta) % this.orderedSentences.length;
+      if (this.selectedOrdered < 0) this.selectedOrdered += this.orderedSentences.length - 1;
+
+      this.socket.emit("select order", this.selectedOrdered);
     }
   },
 }
@@ -208,6 +237,24 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: end;
+  }
+  #scrollable-container {
+    position:absolute;
+    
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    top: 0;
+    padding-top: 10vh;
+    transition: top 0.5s ease;
+  }
+  #scrollable-container.is-screen {
+    padding-top: 20vh;
+  }
+  #scrollable-container.is-mod {
+    padding-top: 25vh;
   }
   #input-main {
     display: flex;
@@ -269,7 +316,7 @@ export default {
   }
 
   #player-order-container {
-    margin-top: 1rem;
+    padding-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -299,24 +346,70 @@ export default {
   .sentence {
     display: flex;
     font-size: 2.5rem;
+    height: 3.5rem;
     white-space: nowrap;
-    margin-top: 0.35rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
-  @media (min-width: calc(336px)) {
-    #poemcontainer {
-      /* this font size will grow with the browser */
-      font-size: calc(0.2rem + 5vw);
-    }
+  .sentence.own-sentence {
+    background-color: #e7e7e7;
+    border-radius: 1em;
   }
-  @media (min-width: calc(590px)) {
-    #poemcontainer {
-      /* cap off font size growth */
-      font-size: 2rem;
-    }
+  .sentence.selected-sentence {
+    border-radius: 0.5em;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  }
+  #container {
+    padding-top: 0;
+  }
+  #title {
+    margin-top: 1rem;
   }
   .is-screen>#title {
     margin-top: 2rem;
     font-size: 5rem;
+  }
+
+  #gradient-after {
+    top: 0;
+    height: 10vh;
+    z-index: 1;
+    
+    width: 100vw;
+    background: white;
+    background: linear-gradient(0deg,rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1) 100%);
+  }
+  #gradient-after.is-screen {
+    width: 50vw;
+    height: 20vh;
+    border-radius: 5rem;
+  }
+
+  .mod-panel {
+    display: flex;
+    justify-content: flex-end;
+    background: #002fff;
+    background: linear-gradient(0deg,rgba(0, 47, 255, 0) 0%, rgba(83, 211, 237, 1) 100%);
+    color: black;
+    height: 4rem;
+    padding: 0.5rem;
+  }
+
+  .mod-panel .btn {
+    font-size: 1rem;
+  }
+
+  .next-button {
+    position: relative;
+    float: right;
+    align-self: flex-end;
+    right:0;
+  }
+  .prev-button {
+    position: absolute;
+    float: left;
+    left:0;
+    margin-left: 0.5rem;
   }
 
 </style>

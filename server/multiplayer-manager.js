@@ -42,15 +42,14 @@ let state = {
 
   // Order
   orderEnglishWords: true,
+  orderedSentences: new Array(),
+  selectedOrdered: 0,
 }
 
 let displayState = {
   // Numbers
   playerNumbers: new Array(),
   selectedNumber: -1,
-
-  // Order
-  orderedSentences: new Array(),
 
   // Love
   loveLetters: new Array(),
@@ -124,12 +123,12 @@ function resetState() {
   }
 
   state.orderEnglishWords = true;
+  state.orderedSentences = new Array();
+  state.selectedOrdered = 0;
 
   // Display
   displayState.playerNumbers = new Array();
   displayState.selectedNumber = -1;
-
-  displayState.orderedSentences = new Array();
 
   displayState.loveLetters = new Array();
   displayState.approvedLetters = new Array();
@@ -300,11 +299,24 @@ module.exports = function(socketInstance) {
       io.to('display channel').emit('new display state', displayState);
     })
 
-    socket.on('send order', (sentence) => {
-      displayState.orderedSentences.push(sentence);
+    socket.on('send order', (sentence, callback) => {
+      let it = state.orderedSentences.length;
+      state.orderedSentences.push(sentence);
       
-      io.to('display channel').emit('new display state', displayState);
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+      return callback(it);
     });
+
+    socket.on("select order", (n) => {
+      if (isNaN(state.selectedNumber))
+        state.selectedOrdered = -1;
+      if (!isNaN(n))
+        state.selectedOrdered = n;
+
+      socket.emit('new state', state)
+      socket.broadcast.emit('new state', state)
+    })
 
     socket.on('send letter', (sentence) => {
       displayState.loveLetters.push(sentence);
@@ -576,10 +588,11 @@ module.exports = function(socketInstance) {
             s += w[c];
             w.splice(c, 1);
           }
-          displayState.orderedSentences.push(s);
+          state.orderedSentences.push(s);
         }
-        
-        io.to('display channel').emit('new display state', displayState);
+
+        socket.emit('new state', state)
+        socket.broadcast.emit('new state', state)
       }
     })
 

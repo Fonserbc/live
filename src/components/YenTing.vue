@@ -2,8 +2,7 @@
   <div>
     <canvas class="static" ref="canvas"></canvas>
     <h1 class="title-h1" v-if="lang === 'zh'">羅妍婷的多重選擇</h1>
-    <h1 :class="{'title-h1':true,'is-screen':isScreen}" v-if="lang === 'en'">YenTing & Your Choices</h1>
-    <h2 v-else>YenTing & Your Choices</h2>
+    <h1 :class="{'title-h1':true,'is-screen':isScreen}">YenTing & Your Choices</h1>
 
 
     <p id="mod-message" v-if="!isMod && message.length > 0">{{ message }}</p>
@@ -113,8 +112,9 @@ export default {
 .title-h1 {
     margin: 2em;
     text-align: center;
-    margin-bottom: 0.1em;
-    font-size: 2em;
+    margin-bottom: 0em;
+    font-size: 2.5em;
+    margin-top: 1em;
 }
 
 .title-h1.is-screen {
@@ -129,13 +129,13 @@ h1 {
 
 h2 {
   text-align: center;
-    margin-bottom: 1em;
-    font-size: 1.75em;
+  margin-bottom: 1em;
+  font-size: 1.75em;
 }
 
   #welcome {
     text-align: center;
-    margin: 2em 0 2em 0;
-  font-size: 1.5rem;
+    margin: 1.5em 0 1em 0;
+    font-size: 1.75rem;
   }
 </style>

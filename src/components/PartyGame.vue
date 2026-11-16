@@ -96,6 +96,7 @@ export default {
       isScreen: this.$route.query.role === 'screen',
       isYenTing: this.$route.query.role === 'yenting',
       isMusician: this.$route.query.role === 'musician' || this.$route.query.role === 'yenting',
+      isPlayer: this.$route.query.role != 'musician' && this.$route.query.role != 'yenting' && this.$route.query.role != 'screen' && this.$route.query.role != 'mod',
       wordList,
       blankList: new Array(wordList.length),
       isLocked: false,
@@ -440,6 +441,8 @@ export default {
 
   .main.is-screen {
     min-height: 100vh;
+    
+    overflow-y: hidden;
   }
 
   .main.is-screen.centered {

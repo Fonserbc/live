@@ -377,6 +377,14 @@ module.exports = function(socketInstance) {
         
         io.to('display channel').emit('new display state', displayState);
       }
+      else if (state.game == 'Order')
+      {
+        if (state.selectedOrdered + 9 < state.orderedSentences.length)
+        {
+          let max = state.selectedOrdered + 9;
+          state.orderedSentences.splice(max, state.orderedSentences.length - max);
+        }
+      }
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
     })
@@ -562,7 +570,7 @@ module.exports = function(socketInstance) {
       {
         for (let i = 0; i < 10; ++i)
         {
-          let count = Math.max(Math.floor(Math.random()*10), 3);
+          let count = Math.max(Math.floor(Math.random()*9), 3);
           let n = [];
           for (let j = 0; j < count; ++j)
           {

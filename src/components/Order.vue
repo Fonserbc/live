@@ -29,8 +29,8 @@
     
     <!-- TODO scroll synced through network? -->
     <div v-if="!canInputWords || areWordsSent" id="sentences-container">
-      <div id="scrollable-container" :class="{'is-screen': isScreen, 'is-mod': isMod}" :style="{top: isScreen || isMusician? `${-3.5*selectedOrdered}rem`: '0'}">
-        <div v-for="(sentence, index) in orderedSentences" :class="{'sentence': true, 'selected-sentence': index == selectedOrdered, 'own-sentence': ( sentIterator >= 0 && index == sentIterator)}">
+      <div id="scrollable-container" :class="{'is-screen': isScreen, 'is-mod': isMod}" :style="{top: isScreen || isMusician? `${-3.8*Math.max(0,selectedOrdered - 6)}rem`: '0'}">
+        <div v-for="(sentence, index) in orderedSentences" :class="{'sentence': true, 'is-player':isPlayer, 'selected-sentence': index == selectedOrdered, 'own-sentence': ( sentIterator >= 0 && index == sentIterator)}">
           {{ sentence }}
         </div> 
       </div>
@@ -57,12 +57,12 @@ import socket from '@/socket.js'
 
 const wordsEng = ["wiser", "what", "I", "you", "think", "it", "than", "how", "change", "know", "is", "of", "are"];
 const wordsZh = ["我", "懂", "你", "更", "的", "又", "愛", "了", "白", "想"];
-const maxWords = 9;
+const maxWords = 8;
 
 // Only send one sentence per player once
 
 export default {
-  props: ['lang', 'isMod', 'isScreen', 'isMusician', 'isLocked'],
+  props: ['lang', 'isMod', 'isScreen', 'isMusician', 'isLocked', 'isPlayer'],
   data() {
     return {
       socket: socket,
@@ -249,9 +249,12 @@ export default {
     top: 0;
     padding-top: 10vh;
     transition: top 0.5s ease;
+    padding-bottom: 4rem;
   }
   #scrollable-container.is-screen {
     padding-top: 20vh;
+    overflow-y: hidden;
+    position: fixed;
   }
   #scrollable-container.is-mod {
     padding-top: 25vh;
@@ -261,6 +264,9 @@ export default {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
+  }
+  .button {
+    background-color: rgb(235, 235, 235);
   }
   #send-button {
     background-color: lightgreen;
@@ -345,11 +351,22 @@ export default {
   }
   .sentence {
     display: flex;
-    font-size: 2.5rem;
-    height: 3.5rem;
     white-space: nowrap;
     padding-right: 1rem;
     padding-left: 1rem;
+    font-size: 2.5rem;
+    height: 3.5rem;
+    margin-bottom: 0.3rem;
+  }
+  .sentence.is-player {
+    font-size: 1.5rem;
+    flex-wrap: unset;
+    height: unset;
+    white-space: unset;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    margin-bottom: 0.2rem;
+    padding-bottom: 0.3rem;
   }
   .sentence.own-sentence {
     background-color: #e7e7e7;
@@ -359,11 +376,14 @@ export default {
     border-radius: 0.5em;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   }
+  .sentence.sentence.own-sentence.selected-sentence {
+    background-color: rgb(57, 57, 57);
+    color:white;
+  }
   #container {
     padding-top: 0;
   }
   #title {
-    margin-top: 1rem;
   }
   .is-screen>#title {
     margin-top: 2rem;

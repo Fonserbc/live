@@ -65,8 +65,8 @@ let votesSets = {
     'Christopher 東東'
   ],
   'length': [
-    'Long notes',// 長音
-    'Short notes'//短音
+    'Long',// 長音
+    'Short'//短音
   ],
   'loudness': [
     'Strong',// 強

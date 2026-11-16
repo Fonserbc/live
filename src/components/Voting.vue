@@ -52,7 +52,7 @@
 
     <div v-if="canVote">
       <div v-if="votingState=='voting'" class="results-flex">
-        <div v-for="(v, id) in votes" :class="['result-column', `column-${id}`]">
+        <div v-for="(v, id) in votes" :class="['voting-column', `column-${id}`]">
           <button v-for="(numVotes, index) in v" @click="triggerVote(id, index)" class="vote-btn">
             <span class="results-bg"></span>
             <span class="results-bar" :style="{ width: `${ numVotes / Math.max(totalVotes[id], 1) * 100 }%` }"></span>
@@ -70,16 +70,17 @@
       <div v-if="votingState=='voting'" class="results-flex">
         <div v-for="(v, id) in orderedVotes" :class="['result-column', `column-${id}`]">
           <TransitionGroup name="list" tag="ul">
-            <li v-for="item in v" :key="item" class="vote-btn">
-              <span class="results-bg"></span>
-              <span class="results-bar" :style="{ width: `${ votes[id][item] / Math.max(totalVotes[id], 1) * 100 }%` }"></span>
-              {{displays[id][item]}}
-
-              <span class="vote-count">{{votes[id][item]}}</span>
-              <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
-              </svg>
-
+            <li v-for="item in v" :key="item" class="vote-li" :style="{ height: `${(1 + Math.max(1 - totalVotes[id], votes[id][item]) / Math.max(totalVotes[id], 2 - totalVotes[id])) * 15 }vh` }">
+              <img class="circle circle-svg center" src="/circle.svg">
+              <img class="circle circle-svg-2 center" src="/circle14.svg">
+              <div class="li-bg"></div>
+              <div class="result-name">{{displays[id][item]}}</div>
+              <div>
+                <span class="vote-count">{{votes[id][item]}}</span>
+                <svg width="31" height="28" viewBox="0 0 31 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.0562 5.67499L15.5 6.52989L15.9438 5.67499C17.1005 3.44663 19.2907 1.70064 21.6021 0.929149C23.9163 0.156704 26.2417 0.388316 27.7838 1.9284C31.4054 5.54518 31.4054 11.4089 27.7838 15.0257L15.5 27.2934L3.21616 15.0257C-0.405386 11.4089 -0.405386 5.54518 3.21616 1.9284C4.75827 0.388316 7.08371 0.156704 9.39794 0.929149C11.7093 1.70065 13.8995 3.44663 15.0562 5.67499Z" />
+                </svg>
+              </div>
             </li>
           </TransitionGroup>
         </div>
@@ -311,17 +312,26 @@ export default {
   /* width: 40vw;
   max-width: 20rem;
   min-width: 10rem; */
+  min-width: 35vh;
+  min-height: 50vh;
+}
+
+.voting-column {
+  flex: 1 1 auto;
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
-.screen>.results-flex>.result-column
+.screen>.results-flex>.voting-column
 {
   padding-left: 2rem;
   padding-right: 2rem;
 }
 
 .result-column:first-child:not(:last-child) {
+  border-right: 2px dashed black;
+}
+.voting-column:first-child:not(:last-child) {
   border-right: 2px dashed black;
 }
 
@@ -377,22 +387,87 @@ export default {
   gap: 0.2em 1em;
 }
 
-li.vote-btn {
-  text-wrap: nowrap;
-  transition: all 0.3s;
-  /* border-radius: 50%;
-  aspect-ratio: 1;
-  display: flex; */
+ul {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2em;
 }
 
-li.vote-btn:first-child {
-  transform: scale(1.1);
+.vote-li {
+  background: white;
+  padding: 0.5em;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+
+  text-align: center;
+  font-size: 1.3em;
+  /* font-weight: bold; */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10%;
+  align-items: center;
+  position: relative;
+
+  text-wrap: nowrap;
+  transition: all 0.3s;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  display: flex;
+  border: 2px solid #aaa;
+}
+
+.result-name {
+  font-size: 150%;
+}
+
+.vote-li:first-child {
   border: black solid 2px;
 }
 
-li.vote-btn:not(:first-child) {
+.vote-li:not(:first-child) {
   color: #828282;
   box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+  /* margin-top: 1em; */
+}
+
+
+
+.vote-li:first-child>.result-name {
+  font-weight: 700;
+}
+
+.vote-li:not(:first-child)>img {
+  opacity: 0;
+}
+.vote-li.list-move>img {
+  opacity: 0;
+}
+
+li>.circle.center {
+  z-index: -2;
+  width: 120%;
+  filter:invert();
+  transition: opacity 0.3s ease;
+}
+li>.circle-svg {
+  animation-duration: 60s;
+  animation-direction: reverse;
+}
+li>.circle-svg-2 {
+  animation-duration: 70s;
+  animation-direction: reverse;
+}
+
+.li-bg {
+  position:absolute;
+  background-color: white;
+  width: 100%;
+  height: 100%;
+  top:0;
+  z-index: -1;
+  border-radius: 50%;
 }
 
 .list-move, /* apply transition to moving elements */

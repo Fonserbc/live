@@ -4,16 +4,16 @@
       <button @click="startVoting()" class="btn btn--mod">{{selectedVoting == ''? 'Select voting first..' : `Start ${selectedVoting} vote`}}</button>
       <select v-model="selectedVoting">
           <option disabled value="">Select..</option>
-          <option>leader</option>
+          <!-- <option>leader</option> -->
+          <option>pitch</option>
           <option>length</option>
           <option>loudness</option>
-          <option>pitch</option>
           <option>mood</option>
           <option disabled value="">Multiple</option>
-          <option>leader + length</option>
-          <!-- <option>leader + loudness</option> -->
+          <!-- <option>leader + length</option>
+          <option>leader + loudness</option>
           <option>leader + pitch</option>
-          <option>leader + mood</option>
+          <option>leader + mood</option> -->
           <option>length + loudness</option>
           <option>length + pitch</option>
           <option>length + mood</option>
@@ -21,14 +21,14 @@
           <option>loudness + mood</option>
           <option>pitch + mood</option>
         </select>
-        <button v-if="votingState === 'voting'" @click="confirmAction(endVoting, 'end voting round?')" class="btn btn--mod">End Vote</button>
+        <!-- <button v-if="votingState === 'voting'" @click="confirmAction(endVoting, 'end voting round?')" class="btn btn--mod">End Vote</button> -->
     </div>
     <div id="content">
-    <h1 id="title">
-      可連續投票
+    <h1 id="title" :class="{'is-screen': isScreen}">
+      Epiphyllum
     </h1>
     
-    <div v-if="votingState=='results'" class="results">
+    <!-- <div v-if="votingState=='results'" class="results">
       <div id="results-subtitle">Results:</div>
       <div class="results-flex">
         <div :class="['result-column', `column-${index}`]" v-for="(v, index) in orderedVotes">
@@ -48,9 +48,9 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
-    <div v-if="!isScreen">
+    <div v-if="canVote">
       <div v-if="votingState=='voting'" class="results-flex">
         <div v-for="(v, id) in votes" :class="['result-column', `column-${id}`]">
           <button v-for="(numVotes, index) in v" @click="triggerVote(id, index)" class="vote-btn">
@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <div v-if="isScreen" class="screen">
+    <div v-if="!canVote" class="screen">
       <div v-if="votingState=='voting'" class="results-flex">
         <div v-for="(v, id) in orderedVotes" :class="['result-column', `column-${id}`]">
           <TransitionGroup name="list" tag="ul">
@@ -94,12 +94,10 @@ import socket from '@/socket.js'
 
 
 export default {
+  props: ['isScreen', 'isMod', 'isLocked', 'isMusician'],
   data() {
     return {
       socket: socket,
-      isMod: this.$route.query.role === 'mod',
-      isScreen: this.$route.query.role === 'screen',
-      isLocked: false,
       url: '',
 
       votingState: 'intro',
@@ -141,6 +139,9 @@ export default {
       }
 
       return allOrderedVotes;
+    },
+    canVote() {
+      return !this.isScreen && !this.isMusician;
     }
   },
 
@@ -191,7 +192,6 @@ export default {
 
 <style scoped>
 #content {
-  padding-top: 1rem;
   justify-content: center;
   align-items: center;
   display: flex;
@@ -199,7 +199,13 @@ export default {
   min-height: 60vh;
 }
 #title {
+  margin-top: 1rem;
   margin-bottom: 4rem;
+}
+#title.is-screen{
+  font-size: 5rem;
+  margin: 0px;
+  padding-bottom: 1em;
 }
 .mod-panel {
   display: flex;
@@ -374,6 +380,9 @@ export default {
 li.vote-btn {
   text-wrap: nowrap;
   transition: all 0.3s;
+  /* border-radius: 50%;
+  aspect-ratio: 1;
+  display: flex; */
 }
 
 li.vote-btn:first-child {

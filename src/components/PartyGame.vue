@@ -131,7 +131,7 @@ export default {
       return this.game == 'FillingIn' || this.game == 'ChoicesPath' || this.game == 'Numbers' || this.game == 'Order';
     },
     shouldCenterVerticallyMain() {
-      return this.game == 'YenTing' || this.game == 'ChoicesPath' || this.game == 'Love' || this.game == 'Promo';
+      return this.game == 'YenTing' || this.game == 'ChoicesPath' || this.game == 'Love' || this.game == 'Promo' || this.game == 'Voting';
     }
   },
 

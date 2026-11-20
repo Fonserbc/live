@@ -1,11 +1,11 @@
 <template>
   <div>
     <canvas class="static" ref="canvas"></canvas>
-    <h1 class="url">Tumbleweed from nowhere</h1>
+    <!-- <h1 class="url">Tumbleweed from nowhere</h1>
     <h2>風滾草</h2>
     
-    <p id="welcome" >請等待指令...</p>
-    <img id="album" src="/tumbleweed.jpg"></img>
+    <p id="welcome" >請等待指令...</p> -->
+    <img id="album" src="/tumbleweed.jpg" :class="{'is-screen': isScreen}"></img>
   </div>
 </template>
 
@@ -13,6 +13,7 @@
 import socket from '@/socket.js'
 
 export default {
+  props: ['isScreen'],
   data() {
     return {
       socket: socket,
@@ -100,6 +101,9 @@ export default {
 
 #album {
   height: 60vh;
+}
+#album:not(.is-screen) {
+  margin-top: 3rem;
 }
 #mod-message {
   font-size: 1.5rem;

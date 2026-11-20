@@ -10,6 +10,13 @@
     <p id="welcome" v-else>Welcome! {{lang == "zh"? "請等待指令" : "Please wait"}}...</p>
 
     <textarea v-if="isMod" v-model="message" placeholder="message" @change="setMessage()"></textarea>
+    <details v-if="isMod" class="details">
+      <summary>QR transform</summary>
+      <input v-model.number="qrTransform.scale" @change="sentQrTransform()"/>
+      <br>
+      <input v-model.number="qrTransform.translate.x" @change="sentQrTransform()" />
+      <input v-model.number="qrTransform.translate.y" @change="sentQrTransform()"/>
+    </details>
   </div>
 </template>
 
@@ -25,6 +32,10 @@ export default {
       width: null,
       height: null,
       message: "",
+      qrTransform: {
+        translate: {x:0, y:0},
+        scale: 1,
+      }
     }
   },
   mounted() {
@@ -32,6 +43,7 @@ export default {
     
     this.socket.on('new state', this.setState)
     this.socket.emit('join',this.setState)
+    this.socket.on('new display state', this.setDisplayState)
 
     // this.ctx = this.canvas.getContext('2d');
     // this.ctx.fillStyle = "#e6e6e6"
@@ -48,11 +60,23 @@ export default {
     setState(state) {
       this.message = state.welcomeMessage;
     },
+    setDisplayState(display) {
+      this.qrTransform.scale = display.transform.qr.scale;
+      this.qrTransform.translate.x = display.transform.qr.translate.x;
+      this.qrTransform.translate.y = display.transform.qr.translate.y;
+    },
     setMessage()
     {
       if (this.isMod)
       {
         socket.emit('mod message', this.message);
+      }
+    },
+    sentQrTransform()
+    {
+      if (this.isMod)
+      {
+        socket.emit('qr transform', this.qrTransform);
       }
     },
     draw() {
@@ -137,5 +161,12 @@ h2 {
     text-align: center;
     margin: 1.5em 0 1em 0;
     font-size: 1.75rem;
+  }
+
+  .details {
+    z-index: 10;
+    position: relative;
+    background-color: green;
+    padding: 1rem;
   }
 </style>

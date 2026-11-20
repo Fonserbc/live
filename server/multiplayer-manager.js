@@ -55,6 +55,13 @@ let displayState = {
   loveLetters: new Array(),
   approvedLetters: new Array(),
   loveLetterId: -1,
+
+  transform: {
+    qr: {
+      translate: {x:0, y:0},
+      scale: 1,
+    }
+  }
 }
 
 let votesSets = {
@@ -602,6 +609,13 @@ module.exports = function(socketInstance) {
         socket.emit('new state', state)
         socket.broadcast.emit('new state', state)
       }
+    })
+
+    socket.on('qr transform', function(qr) {
+      displayState.transform.qr.scale = qr.scale;
+      displayState.transform.qr.translate = qr.translate;
+
+      io.to('display channel').emit('new display state', displayState);
     })
 
     socket.on('disconnect', function (fn) {

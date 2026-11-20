@@ -7,7 +7,7 @@
         <select @change="changeGame" v-model="game">
           <option disabled value="">Select..</option>
           <option>YenTing</option>
-          <option>FillingIn</option>
+          <!-- <option>FillingIn</option> -->
           <option>ChoicesPath</option>
           <!-- <option>Raven</option> -->
           <option>Numbers</option>
@@ -15,8 +15,9 @@
           <option>Voting</option>
           <option>Love</option>
           <option>Tumbleweed</option>
-          <!-- <option disabled value="">---</option>
-          <option>Promo</option> -->
+          <option disabled value="">---</option>
+          <!-- <option>Promo</option> -->
+          <option>Credits</option>
         </select>
       </div>
       <!-- <div class="mod-panel__controls"> -->
@@ -60,7 +61,7 @@
 
     <component v-if="game !== undefined && game != ''" :is="game" v-bind="$data" />
 
-    <div v-if="game === 'YenTing'" id="yenting-qr-container">
+    <div v-if="game === 'YenTing' && !isMod" id="yenting-qr-container" :style="qrStyle">
       <canvas ref="canvasBig" id="qrcode-big"></canvas>
       <div id="url">live.yentinglo.net</div>
     </div>
@@ -85,10 +86,11 @@ import Voting from './Voting.vue'
 import Love from './Love.vue'
 import Tumbleweed from './Tumbleweed.vue'
 import Promo from './Promo.vue'
+import Credits from './Credits.vue'
 
 
 export default {
-  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love, Tumbleweed, Promo },
+  components: { FillingIn, Raven, YenTing, ChoicesPath, Numbers, Order, Voting, Love, Tumbleweed, Promo, Credits },
   data() {
     return {
       socket: socket,
@@ -108,6 +110,7 @@ export default {
 
       orderEnglishWords: true,
       lang: 'en',
+      transform: null
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
@@ -132,7 +135,10 @@ export default {
       return this.game == 'FillingIn' || this.game == 'ChoicesPath' || this.game == 'Numbers' || this.game == 'Order';
     },
     shouldCenterVerticallyMain() {
-      return this.game == 'YenTing' || this.game == 'ChoicesPath' || this.game == 'Love' || this.game == 'Promo' || this.game == 'Voting';
+      return this.game == 'YenTing' || this.game == 'ChoicesPath' || this.game == 'Love' || this.game == 'Promo' || this.game == 'Voting' || this.game == 'Tumbleweed' || this.game == 'Credits';
+    },
+    qrStyle() {
+      return this.transform == null || !this.isScreen? "" : `transform: scale(${this.transform.qr.scale}) translate(${this.transform.qr.translate.x}px,${this.transform.qr.translate.y}px)`;
     }
   },
 
@@ -268,6 +274,7 @@ export default {
 
     setDisplayState(newDisplayState) {
       //console.log("received new display state")
+      this.transform = newDisplayState.transform;
     }
   },
 }

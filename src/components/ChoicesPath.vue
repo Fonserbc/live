@@ -8,11 +8,11 @@
         </h1>
         <p v-for="(line, index) in pathWords" :key="index" :class="['line', `line-${index}`]">
           <span>{{ line[0].substring(0, line[0].indexOf("$")) }}</span>
-          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :pathState="pathState" :pathOpen="pathState[0] == '1'" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]"/>
+          <WordChoice v-if="line[1].length > 1" :id="index * 2" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :pathState="pathState" :pathOpen="pathState[0] == '1'" :choices="line[1]" :openedBy="openedBy" :syncChoices="pathChoices" :socket="socket" :initialChoiceId="pathChoices[index * 2]" :isScreen="isScreen"/>
           <!-- {{ line[1][pathFirstChoice[index]]}} -->
           <span>{{ line[0].substring(line[0].indexOf("$") + 1, line[0].length) + " "}}</span>
           <!-- {{ line[2][pathSecondChoice[index]] }} -->
-          <WordChoice :id="index * 2 + 1" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices='line[2]' :pathState="pathState" :pathOpen="pathState[1] == '1'" :openedBy="openedBy" :socket='socket' :syncChoices="pathChoices" :initialChoiceId="pathChoices[index * 2 + 1]"/>
+          <WordChoice :id="index * 2 + 1" @open="wordSelectorOpen" @close="wordSelectorClose" :isLocked="isLocked && !isMod" :choices='line[2]' :pathState="pathState" :pathOpen="pathState[1] == '1'" :openedBy="openedBy" :socket='socket' :syncChoices="pathChoices" :initialChoiceId="pathChoices[index * 2 + 1]" :isScreen="isScreen"/>
         </p>
         <!-- <p>
           <span>長頭髮的<WordSelector i="0" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='1' :wordList='wordList' :blankList='blankList' :socket='socket' />住在<WordSelector i="1" v-on:wordSelectorOpen="wordSelectorOpen" v-on:wordSelectorClose="wordSelectorClose" :isLocked="isLocked && !isMod" length='2' :wordList='wordList' :blankList='blankList' :socket='socket' />裡</span>
@@ -53,16 +53,14 @@ import WordChoice from '@/components/WordChoice.vue'
 
 
 export default {
+  props: ['isScreen', 'isMod', 'isLocked'],
   components: { WordChoice },
   data() {
     return {
       socket: socket,
-      isMod: this.$route.query.role === 'mod',
-      isScreen: this.$route.query.role === 'screen',
       pathWords,
       pathChoices: new Array(pathWords.length * 2),
       openedBy: new Array(pathWords.length * 2),
-      isLocked: false,
       pathState: '01',
       url: '',
 
@@ -117,7 +115,6 @@ export default {
         this.openedBy = newState.choices[newState.game].openedBy;
         this.pathChoices = newState.choices[newState.game].choices;
       }
-      this.isLocked = newState.isLocked
       this.pathState = newState.pathState;
     }
   },
@@ -153,6 +150,9 @@ export default {
     font-size: 1.2rem;
     padding: 0.5em 0.5em 1em;
   }
+  .poemcolumn {
+    font-weight: bold;
+  }
   @media (min-width: calc(336px)) {
     #poemcontainer {
       /* this font size will grow with the browser */
@@ -162,7 +162,7 @@ export default {
   @media (min-width: calc(590px)) {
     #poemcontainer {
       /* cap off font size growth */
-      font-size: 2rem;
+      font-size: 2.5rem;
     }
   }
   /* This styling only happens if we are a role=screen, and actually I've been only testing it against a 1280p screen */
@@ -181,6 +181,7 @@ export default {
       display: flex;
       flex-direction: row;
       justify-content: center;
+      font-weight: bold;
     }
 
     #title {

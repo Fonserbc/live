@@ -29,7 +29,8 @@
     
     <!-- TODO scroll synced through network? -->
     <div v-if="!canInputWords || areWordsSent" id="sentences-container">
-      <div id="scrollable-container" :class="{'is-screen': isScreen, 'is-mod': isMod}" :style="{top: isScreen || isMusician? `${-3.8*Math.max(0,selectedOrdered - 6)}rem`: '0'}">
+       <!-- 1.3 margin? it was 3.8 when 2.5 height -->
+      <div id="scrollable-container" :class="{'is-screen': isScreen, 'is-mod': isMod}" :style="{top: isScreen || isMusician? `${-4.3*Math.max(0,selectedOrdered - 5)}rem`: '0'}">
         <div v-for="(sentence, index) in orderedSentences" :class="{'sentence': true, 'is-player':isPlayer, 'selected-sentence': index == selectedOrdered, 'own-sentence': ( sentIterator >= 0 && index == sentIterator)}">
           {{ sentence }}
         </div> 
@@ -354,9 +355,10 @@ export default {
     white-space: nowrap;
     padding-right: 1rem;
     padding-left: 1rem;
-    font-size: 2.5rem;
-    height: 3.5rem;
+    font-size: 3rem;
+    height: 4rem;
     margin-bottom: 0.3rem;
+    transition: all 0.3s;
   }
   .sentence.is-player {
     font-size: 1.5rem;
@@ -375,8 +377,13 @@ export default {
   .sentence.selected-sentence {
     border-radius: 0.5em;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+    color: #27952b;
   }
-  .sentence.sentence.own-sentence.selected-sentence {
+  .is-screen>.sentence.selected-sentence {
+    transform: scale(1.2);
+  }
+  .sentence.own-sentence.selected-sentence {
     background-color: rgb(57, 57, 57);
     color:white;
   }

@@ -1,5 +1,5 @@
 <template>
-  <div id="container">
+  <div id="container" :class="{'is-screen': isScreen}">
     <h1 id="title" :class="{'cursive-bold': true, 'is-screen': isScreen}">
       Writing Love
     </h1>
@@ -39,7 +39,7 @@
       {{`Received ${loveLetters.length}, approved ${approvedLetters.length}`}}
     </div>
     
-    <div align='left' v-if="(isYenTing || isMusician) && loveLetterId >= 0 && loveLetters.length > 0" class="sent-letter-container" >
+    <div align='left' v-if="(isYenTing || isMusician) && loveLetterId >= 0 && loveLetters.length > 0" id="musicians-view" class="sent-letter-container" >
       {{loveLetters[loveLetterId%loveLetters.length]}}
     </div>
 
@@ -55,7 +55,7 @@
 
     <div v-if="isMod" v-for="(letter, index) in loveLetters" :key="index" :class="{'approval-container': true, 'hiding': approvalMap.has(index) && !approvalMap.get(index).show, 'approved': approvalMap.has(index) && approvalMap.get(index).approved,  'denied': approvalMap.has(index) && !approvalMap.get(index).approved }">
       <div :class="{'approval-id': true, 'seen': index == loveLetterId}" @click="toggleLetterShow(index)">{{ index == loveLetterId? "👁️" : index }}</div>
-      <div align='left' v-if="!approvalMap.has(index) || approvalMap.get(index).show">{{ letter }}</div>
+      <div align='left' v-if="!approvalMap.has(index) || approvalMap.get(index).show" class="reviewing-letter">{{ letter }}</div>
       <div class="approve-container"><div style="color: green" class="button" @click="approveLetter(index)">Approve</div><div style="color: red" class="button" @click="disproveLetter(index)">Don't approve</div></div>
     </div>
   </div>
@@ -292,6 +292,19 @@ export default {
     font-size: 1.5rem;
     padding: 0.5em 0.5em 1em;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  #container.is-screen {
+    padding-bottom: 4rem;
+  }
+  #musicians-view.sent-letter-container {
+    font-size: 1.5em;
+    border-radius: 0.5em;
+    border: solid black 2px;
+    padding: 1em;
   }
   #description-noletters {
     font-size: 1.5em;
@@ -418,6 +431,10 @@ export default {
     overflow-wrap: break-word;
     pointer-events: none;
   }
+  .reviewing-letter {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
   .sent-word {
     font-size: 2rem;
     margin-bottom: 0.5rem;
@@ -441,9 +458,10 @@ export default {
   #open-letter-button {
     margin: auto;
     display: inline-block;
-    position: fixed;
+    position:fixed;
     bottom: 2rem;
-    margin-right: 1em;
+    left: 0em;
+    font-size: 1em;
     z-index: 1;
   }
   .approval-container {
@@ -490,6 +508,7 @@ export default {
   }
   .sent-letter-container.preview {
     margin-left: 1em;
+    font-size: 1.2em;
   }
 
   #title.is-screen {

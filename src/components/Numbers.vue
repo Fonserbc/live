@@ -17,22 +17,22 @@
     </div>
     
     <div id="display" v-if="!canInputNumbers">
-      <div id="player-numbers-after">
+      <div id="player-numbers-after" :class="{'is-screen':isScreen}">
         <div v-if="selectedId >= 0" v-for="([numbers, nid], index) in playerNumbers.slice(0,selectedId)" :key="nid" :class="{'list-numbers-container': true}">
-          <div v-for="number in numbers" :class="['number-'+number, 'player-number', 'unsent-number']">
+          <div v-for="number in numbers" :class="['number-'+number, 'player-number', 'unsent-number', (isScreen?'is-screen':null)]">
             {{ number }}
           </div>
         </div>
       </div>
       <div id="gradient-after" :class="{'is-screen':isScreen}"></div>
-      <div id="player-number-container" :class="{'sent-container': selectedId >= 0 && selectedId < playerNumbers.length, 'player-number-display': true}">
-        <div v-if="selectedId >= 0 && selectedId < playerNumbers.length" v-for="number in playerNumbers[selectedId][0]" :class="['number-'+number, 'player-number']">
+      <div id="player-number-container" :class="{'sent-container': selectedId >= 0 && selectedId < playerNumbers.length, 'player-number-display': true, 'is-screen': isScreen}">
+        <div v-if="selectedId >= 0 && selectedId < playerNumbers.length" v-for="number in playerNumbers[selectedId][0]" :class="['number-'+number, 'player-number',  (isScreen?'is-screen':null)]">
           {{ number }}
         </div>
       </div>
-      <div id="player-numbers-before">
+      <div id="player-numbers-before" :class="{'is-screen':isScreen}">
         <div v-for="([numbers, nid], index) in playerNumbers.slice(selectedId + 1)" :key="nid" :class="{'list-numbers-container': true}">
-          <div v-for="number in numbers" :class="['number-'+number, 'player-number',  'unsent-number']">
+          <div v-for="number in numbers" :class="['number-'+number, 'player-number',  'unsent-number',  (isScreen?'is-screen':null)]">
             {{ number }}
           </div>
         </div>
@@ -91,15 +91,15 @@ export default {
   mounted() {
     this.url = window.location.protocol + '//' + window.location.host + window.location.pathname
 
-    this.socket.on('connect', this.connect);
+    // this.socket.on('connect', this.connect);
     // this.socket.on('new state', this.setState);
     this.socket.on('new display state', this.newDisplayState);
     if (!this.canInputNumbers)
       this.numbersLocked = true;
     
-    // this.socket.emit('join', (state) => {
-    //   this.setState(state);
-    // });
+    this.socket.emit('join', (state) => {
+      
+    });
   },
 
   beforeUnmount() {
@@ -121,9 +121,6 @@ export default {
   },
 
   methods: {
-    connect() {
-      console.log('connected')
-    },
     offerReset() {
       if (confirm('Are you sure you want to reset everything?')) {
         this.sendReset()
@@ -167,8 +164,8 @@ export default {
     },
     newDisplayState(newDisplayState)
     {
-      this.playerNumbers = newDisplayState.playerNumbers;
-      this.selectedId = newDisplayState.selectedNumber;
+      if (newDisplayState.playerNumbers !== undefined) this.playerNumbers = newDisplayState.playerNumbers;
+      if (newDisplayState.selectedNumber !== undefined) this.selectedId = newDisplayState.selectedNumber;
     },
     selectNumber(delta)
     {
@@ -230,6 +227,9 @@ export default {
     width: min-content;
     bottom: calc(50vh - 4rem);
   }
+  #player-number-container.player-number-display.is-screen {
+    bottom: calc(50vh - 7rem);
+  }
   #gradient-after {
     position: fixed;
     bottom: calc(50vh);
@@ -252,6 +252,9 @@ export default {
     bottom: calc(50vh + 4rem);
     margin: auto;
   }
+  #player-numbers-after.is-screen {
+    bottom: calc(50vh + 7rem);
+  }
   #player-numbers-before {
     display: flex;
     flex-direction: column;
@@ -260,6 +263,9 @@ export default {
     position: fixed;
     top: calc(50vh + 4rem);
     margin: auto;
+  }
+  #player-numbers-before.is-screen {
+    top: calc(50vh + 7rem);
   }
   .list-numbers-container {
     width: 100%;
@@ -307,6 +313,9 @@ export default {
     padding: 0.5rem;
     position: relative;
     transition: all 0.3s;
+  }
+  .player-number.is-screen {
+    font-size: 3rem;
   }
   #input-container {
     position: absolute;
@@ -415,10 +424,19 @@ export default {
     transition: all 0.3s;
     background-color: lightgreen;
   }
+  #player-number-container.sent-container.is-screen {
+    padding-bottom: 4.5rem;
+  }
   .list-numbers-container.sent-container {
     height: 7rem;
     padding-bottom: 2.75rem;
     background-color: lightgreen;
+  }
+  #player-number-container.sent-container.is-screen {
+    height: 10rem;
+  }
+  .list-numbers-container.sent-container.is-screen {
+    height: 10rem;
   }
 
   .mod-panel {

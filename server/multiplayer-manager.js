@@ -57,7 +57,15 @@ let displayState = {
   loveLetterId: -1,
 
   transform: {
-    qr: {
+    'qr': {
+      translate: {x:0, y:0},
+      scale: 1,
+    },
+    'title': {
+      translate: {x:0, y:0},
+      scale: 1,
+    },
+    'welcome': {
       translate: {x:0, y:0},
       scale: 1,
     }
@@ -619,9 +627,9 @@ module.exports = function(socketInstance) {
       }
     })
 
-    socket.on('qr transform', function(qr) {
-      displayState.transform.qr.scale = qr.scale;
-      displayState.transform.qr.translate = qr.translate;
+    socket.on('new transform', function(who, tr) {
+      displayState.transform[who].scale = tr.scale;
+      displayState.transform[who].translate = tr.translate;
 
       io.to('display channel').emit('new display state', displayState);
     })

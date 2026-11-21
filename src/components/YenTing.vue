@@ -2,20 +2,34 @@
   <div>
     <canvas class="static" ref="canvas"></canvas>
     <h1 class="title-h1" v-if="lang === 'zh'">羅妍婷的多重選擇</h1>
-    <h1 :class="{'title-h1':true,'is-screen':isScreen}">YenTing & Your Choices</h1>
+    <h1 :class="{'title-h1':true,'is-screen':isScreen}" :style="titleStyle">YenTing & Your Choices</h1>
 
 
     <p id="mod-message" v-if="!isMod && message.length > 0">{{ message }}</p>
     
-    <p id="welcome" v-else>Welcome! {{lang == "zh"? "請等待指令" : "Please wait"}}...</p>
+    <p id="welcome" v-else  :style="welcomeStyle">Welcome! {{lang == "zh"? "請等待指令" : "Please wait"}}...</p>
 
     <textarea v-if="isMod" v-model="message" placeholder="message" @change="setMessage()"></textarea>
     <details v-if="isMod" class="details">
       <summary>QR transform</summary>
-      <input v-model.number="qrTransform.scale" @change="sentQrTransform()"/>
+      <input v-model.number="transforms.qr.scale" @change="sendTransform('qr')"/>
       <br>
-      <input v-model.number="qrTransform.translate.x" @change="sentQrTransform()" />
-      <input v-model.number="qrTransform.translate.y" @change="sentQrTransform()"/>
+      <input v-model.number="transforms.qr.translate.x" @change="sendTransform('qr')" />
+      <input v-model.number="transforms.qr.translate.y" @change="sendTransform('qr')"/>
+    </details>
+    <details v-if="isMod" class="details">
+      <summary>Title transform</summary>
+      <input v-model.number="transforms.title.scale" @change="sendTransform('title')"/>
+      <br>
+      <input v-model.number="transforms.title.translate.x" @change="sendTransform('title')" />
+      <input v-model.number="transforms.title.translate.y" @change="sendTransform('title')"/>
+    </details>
+    <details v-if="isMod" class="details">
+      <summary>Welcome transform</summary>
+      <input v-model.number="transforms.welcome.scale" @change="sendTransform('welcome')"/>
+      <br>
+      <input v-model.number="transforms.welcome.translate.x" @change="sendTransform('welcome')" />
+      <input v-model.number="transforms.welcome.translate.y" @change="sendTransform('welcome')"/>
     </details>
   </div>
 </template>
@@ -32,10 +46,20 @@ export default {
       width: null,
       height: null,
       message: "",
-      qrTransform: {
-        translate: {x:0, y:0},
-        scale: 1,
-      }
+      transforms: {
+        qr: {
+          translate: {x:0, y:0},
+          scale: 1,
+        },
+        title: {
+          translate: {x:0, y:0},
+          scale: 1,
+        },
+        welcome: {
+          translate: {x:0, y:0},
+          scale: 1,
+        }
+      },
     }
   },
   mounted() {
@@ -56,14 +80,30 @@ export default {
     // window.addEventListener('resize', this.setSize)
     // window.requestAnimationFrame(this.draw)
   },
+  computed: {
+    titleStyle() {
+      return this.transforms.title == null || !this.isScreen? "" : `transform: scale(${this.transforms.title.scale}) translate(${this.transforms.title.translate.x}px,${this.transforms.title.translate.y}px)`;
+    },
+    welcomeStyle() {
+      return this.transforms.welcome == null || !this.isScreen? "" : `transform: scale(${this.transforms.welcome.scale}) translate(${this.transforms.welcome.translate.x}px,${this.transforms.welcome.translate.y}px)`;
+    },
+  },
   methods: {
     setState(state) {
       this.message = state.welcomeMessage;
     },
     setDisplayState(display) {
-      this.qrTransform.scale = display.transform.qr.scale;
-      this.qrTransform.translate.x = display.transform.qr.translate.x;
-      this.qrTransform.translate.y = display.transform.qr.translate.y;
+      this.transforms.qr.scale = display.transform.qr.scale;
+      this.transforms.qr.translate.x = display.transform.qr.translate.x;
+      this.transforms.qr.translate.y = display.transform.qr.translate.y;
+
+      this.transforms.title.scale = display.transform.title.scale;
+      this.transforms.title.translate.x = display.transform.title.translate.x;
+      this.transforms.title.translate.y = display.transform.title.translate.y;
+
+      this.transforms.welcome.scale = display.transform.welcome.scale;
+      this.transforms.welcome.translate.x = display.transform.welcome.translate.x;
+      this.transforms.welcome.translate.y = display.transform.welcome.translate.y;
     },
     setMessage()
     {
@@ -72,11 +112,11 @@ export default {
         socket.emit('mod message', this.message);
       }
     },
-    sentQrTransform()
+    sendTransform(who)
     {
       if (this.isMod)
       {
-        socket.emit('qr transform', this.qrTransform);
+        socket.emit('new transform', who, this.transforms[who]);
       }
     },
     draw() {

@@ -121,9 +121,6 @@ export default {
     this.socket.on('new display state', this.newDisplayState);
     this.socket.on('reset local', this.resetLocal);
     this.socket.on('allow new letter', this.newLetterAllowed);
-    this.socket.emit('join', (state) => {
-      this.setState(state);
-    });
   },
 
   beforeUnmount() {
@@ -308,6 +305,7 @@ export default {
   }
   #description-noletters {
     font-size: 1.5em;
+    font-weight: bold;
   }
   h1 {
     margin-top: 2rem;

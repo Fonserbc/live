@@ -24,7 +24,7 @@
 import socket from '@/socket.js'
 
 export default {
-  props: ['isMod', 'lang', 'socket', 'isScreen'],
+  props: ['isMod', 'lang', 'socket', 'isScreen', 'animateMove'],
   data() {
     return {
       canvas: null,

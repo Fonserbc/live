@@ -1,5 +1,5 @@
 <template>
-  <main :class="{'main':true, 'is-screen':isScreen, 'centered':shouldCenterVerticallyMain}">
+  <main :class="{'main':true, 'is-screen':isScreen, 'centered':shouldCenterVerticallyMain, 'animate-move': animateMove && isScreen}">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <div class="mod-panel" v-if="isMod">
 
@@ -22,6 +22,7 @@
       </div>
       <!-- <div class="mod-panel__controls"> -->
         <input type="checkbox" v-model="showQRScreen" @change="showQRCheck()">Show QR on Screen</input>
+        <input type="checkbox" v-model="animateMove" @change="animateCheck()">Animate move on Screen</input>
 
         <button v-if="game === 'YenTing'" class="btn btn--mod" @click="toggleLanguage()">{{lang}}</button>
 
@@ -110,7 +111,8 @@ export default {
 
       orderEnglishWords: true,
       lang: 'en',
-      transform: null
+      transform: null,
+      animateMove: false,
 
       // Only one WordSelector is allowed open at a time.
       // This represents the index of the one that's open.
@@ -205,6 +207,13 @@ export default {
         this.socket.emit('show qr screen', this.showQRScreen);
       }
     },
+    animateCheck()
+    {
+      if (this.isMod)
+      {
+        this.socket.emit('animate move', this.animateMove);
+      }
+    },
     endRound() {
       this.socket.emit('end round')
     },
@@ -275,6 +284,7 @@ export default {
     setDisplayState(newDisplayState) {
       //console.log("received new display state")
       this.transform = newDisplayState.transform;
+      this.animateMove = newDisplayState.animateMove;
     }
   },
 }
@@ -463,6 +473,34 @@ export default {
 
   #url {
     font-size: 1.8em;
+  }
+
+  .animate-move {
+    animation: y-move 9s ease-in-out infinite alternate,  x-move 7s ease-in-out infinite alternate;
+  }
+
+  .game-component {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @keyframes y-move {
+    0% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(20px)
+    }
+  }
+
+  @keyframes x-move {
+    0% {
+      transform: translateX(-20px);
+    }
+    100% {
+      transform: translateX(20px)
+    }
   }
 
 </style>

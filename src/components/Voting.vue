@@ -448,7 +448,7 @@ ul {
 li>.circle.center {
   z-index: -2;
   width: 120%;
-  filter:invert();
+  filter: invert();
   transition: opacity 0.3s ease;
 }
 li>.circle-svg {

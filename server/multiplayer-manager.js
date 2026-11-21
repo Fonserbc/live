@@ -61,7 +61,8 @@ let displayState = {
       translate: {x:0, y:0},
       scale: 1,
     }
-  }
+  },
+  animateMove: false,
 }
 
 let votesSets = {
@@ -158,6 +159,7 @@ module.exports = function(socketInstance) {
       // hard reset stuff
       state.game = 'YenTing';
       state.showQRScreen = true;
+      displayState.animateMove = true;
     }
   }
 
@@ -217,6 +219,12 @@ module.exports = function(socketInstance) {
 
       socket.emit('new state', state)
       socket.broadcast.emit('new state', state)
+    })
+
+    socket.on('animate move', (animate) => {
+      displayState.animateMove = animate;
+
+      io.to('display channel').emit('new display state', displayState)
     })
 
     socket.on('mod message', (message) => {
